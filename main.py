@@ -22,6 +22,42 @@ def run_command(command, shell=True, cwd=None):
     return stdout.decode()
 
 
+def is_docker_compose_installed():
+    """
+    检查 docker-compose 是否已安装
+    :return: True（已安装）或 False（未安装）
+    """
+    try:
+        # 运行 docker-compose --version 命令
+        result = subprocess.run(
+            ["docker-compose", "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        # 如果命令成功执行，返回 True
+        return result.returncode == 0
+    except FileNotFoundError:
+        # 如果 docker-compose 命令不存在，返回 False
+        return False
+
+def stop_docker_compose_containers(directory):
+    """
+    在指定目录下停止 docker-compose 容器
+    :param directory: 目标目录路径
+    """
+    try:
+        # 切换到目标目录
+        os.chdir(directory)
+        print(f"已切换到目录: {directory}")
+
+        # 运行 docker-compose down 命令
+        subprocess.run(["docker-compose", "down"], check=True)
+        print("容器已停止。")
+    except subprocess.CalledProcessError as e:
+        print(f"停止容器时出错: {e}")
+    except Exception as e:
+        print(f"执行命令时出错: {e}")
+
 def get_public_ip():
     """
     获取公网 IP
@@ -361,6 +397,12 @@ if __name__ == "__main__":
     if public_ip:
         # 替换 Caddyfile 中的 [ip]
         replace_ip_in_caddyfile(public_ip)
+
+        # 检查 docker-compose 是否已安装
+    if is_docker_compose_installed():
+        print("docker-compose 已安装。")
+        # 停止 /www/docker 目录下的容器
+        stop_docker_compose_containers("/www/docker")
 
     # 获取系统信息
     os_info = get_os_distribution()
