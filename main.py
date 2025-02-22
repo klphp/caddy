@@ -1,6 +1,8 @@
 import os
 import shutil
 import sys
+import getpass
+
 import requests
 import ubuntu
 import debian
@@ -138,10 +140,10 @@ def create_directories_and_set_permissions():
     # 在 data 目录下创建 web 目录并设置权限
     web_dir_path = os.path.join("/www/docker/data", "web")
     os.makedirs(web_dir_path, exist_ok=True)
-    run_command(f"chown www:www {web_dir_path}")
+    # run_command(f"chown www:www {web_dir_path}")
 
     # 设置 /www/docker 目录权限
-    run_command("chown -R www:www /www/docker")
+    run_command("chown -R www:www /www/docker/data/web")
 
     print("目录创建和权限设置完成。")
 
@@ -174,31 +176,44 @@ def copy_docker_compose_and_set_permissions():
     print(f"文件 {destination_file} 权限设置完成。")
 
 
-def docker_login(username, password, registry):
-    """使用 docker login 登录"""
+def docker_login(registry, username, password=None):
+    """
+     登录 Docker 私有仓库
+     :param registry: 仓库地址（如 registry.cn-hangzhou.aliyuncs.com）
+     :param username: 用户名
+     :param password: 密码（如果未提供，则提示用户输入）
+     """
+    # 如果未提供密码，提示用户输入
+    if password is None:
+        password = getpass.getpass("请输入 Docker 仓库密码: ")
+
+    # 构建 docker login 命令
+    command = f"sudo docker login --username={username} {registry}"
+
     try:
+        # 使用 subprocess 运行命令，并通过管道输入密码
         process = subprocess.Popen(
-            ['docker', 'login', '--username=' + username,  registry],
+            command,
+            shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True  # 确保 stdin/stdout/stderr 是文本模式
+            universal_newlines=True
         )
-        stdout, stderr = process.communicate(input=password + '\n')  # 添加换行符
 
+        # 输入密码
+        stdout, stderr = process.communicate(input=password + "\n")
+
+        # 检查命令执行结果
         if process.returncode == 0:
             print("Docker 登录成功！")
             print(stdout)
         else:
             print("Docker 登录失败！")
             print(stderr)
-            sys.exit(1)  # 登录失败，退出程序，返回错误码 1
-
-    except FileNotFoundError:
-        print("错误：docker 命令未找到，请确保 Docker 已安装。")
-        sys.exit(1)
+            sys.exit(1)
     except Exception as e:
-        print(f"发生未知错误：{e}")
+        print(f"执行命令时出错: {e}")
         sys.exit(1)
 
 
@@ -239,10 +254,9 @@ if __name__ == "__main__":
         create_directories_and_set_permissions()
         copy_docker_compose_and_set_permissions()
 
-        username = ""
-        password = ""
+        username = "5735570@qq.com"
         registry = "registry.cn-hangzhou.aliyuncs.com"
-        docker_login(username, password, registry)
+        docker_login(registry, username)
 
         print("Docker 登录成功，继续执行后续操作...")
         docker_compose_up()
