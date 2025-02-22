@@ -181,6 +181,8 @@ if __name__ == "__main__":
     os_info = get_os_distribution()
 
     if os_info:
+        add_user_to_docker_group()
+        add_www_user_and_group()
         if os_info.get('ID') == 'ubuntu':
             print("Ubuntu  Docker脚本安装中......")
             ubuntu.install_docker()
@@ -192,8 +194,6 @@ if __name__ == "__main__":
             sys.exit(1) # 退出程序，返回错误码 1
 
         install_docker_compose()
-        add_user_to_docker_group()
-        add_www_user_and_group()
         create_directories_and_set_permissions()
         copy_docker_compose_and_set_permissions()
 

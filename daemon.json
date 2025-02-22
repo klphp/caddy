@@ -1,4 +1,4 @@
 {
-  "userns-remap": "www",
-  "registry-mirrors": ["https://docker.mirrors.ustc.edu.cn/"]
+	"userns-remap": "www",
+	"registry-mirrors":["https://docker.mirrors.ustc.edu.cn/"]
 }
