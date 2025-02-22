@@ -136,6 +136,25 @@ def install_docker_compose():
     run_command(f"chmod +x {output_path}")
 
 
+def copy_index_html():
+    """复制 index.html 到 /www/docker/data/web 目录，存在则覆盖"""
+
+    source_file = "./index.html"
+    destination_file = "/www/docker/data/web/index.html"
+
+    # 检查源文件是否存在
+    if not os.path.exists(source_file):
+        print(f"错误：源文件 {source_file} 不存在。")
+        return
+
+    # 复制文件，存在则覆盖
+    try:
+        shutil.copy2(source_file, destination_file)
+        print(f"文件 {source_file} 复制到 {destination_file} 成功。")
+    except Exception as e:
+        print(f"文件复制失败：{e}")
+
+
 def create_directories_and_set_permissions():
     """创建目录并设置权限"""
 
@@ -160,6 +179,7 @@ def create_directories_and_set_permissions():
     os.makedirs(web_dir_path, exist_ok=True)
     run_command(f"chown www:www {web_dir_path}")
 
+    copy_index_html()
     # 设置 /www/docker 目录权限
     run_command(f"chown -R www:www /www/docker/data/web")
 
