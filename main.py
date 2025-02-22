@@ -264,7 +264,8 @@ if __name__ == "__main__":
 
         print("请手动以下命令：")
         print("newgrp docker")
-        print("sudo systemctl start docker")
+        print("sudo systemctl restart docker")
+        print("出于安全考虑，全部安装完成后建议删除本程序的安装目录")
     else:
         print("无法获取系统信息")
         sys.exit(1)  # 退出程序，返回错误码 1
