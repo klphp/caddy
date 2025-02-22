@@ -42,15 +42,19 @@ def get_os_distribution():
 
 def check_group_exists(group_name):
     """检查用户组是否存在"""
-    result = run_command(f"getent group {group_name}")
-    return result.returncode == 0
-
+    try:
+        run_command(f"getent group {group_name}")
+        return True  # 命令成功执行，说明用户组存在
+    except SystemExit:
+        return False  # 命令执行失败，说明用户组不存在
 
 def check_user_exists(username):
     """检查用户是否存在"""
-    result = run_command(f"id -u {username}")
-    return result.returncode == 0
-
+    try:
+        run_command(f"id -u {username}")
+        return True  # 命令成功执行，说明用户存在
+    except SystemExit:
+        return False  # 命令执行失败，说明用户不存在
 
 def add_user_to_docker_group():
     """将用户添加到 docker 组"""
@@ -75,10 +79,7 @@ def add_user_to_docker_group():
     run_command(f"usermod -aG docker {username}")
     # 更新 docker 用户组
     run_command("newgrp docker")
-    # 重启 docker 服务
-    run_command("service docker restart")
     print(f"用户 {username} 已添加到 {group_name} 组。")
-
 
 def add_www_user_and_group():
     """添加 www 用户和用户组"""
