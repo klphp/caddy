@@ -1,9 +1,7 @@
 import os
 import shutil
 import sys
-
 import requests
-
 import ubuntu
 import debian
 import subprocess
