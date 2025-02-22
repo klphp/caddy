@@ -132,10 +132,10 @@ def create_directories_and_set_permissions():
     sub_directories = ["caddy_config", "caddy_data", "config", "data", "logs"]
 
     # 创建子目录并设置权限
-    for sub_directory in sub_directories:
-        path = os.path.join("/www/docker", sub_directory)
-        os.makedirs(path, exist_ok=True)
-        run_command(f"chown www:www {path}")
+    # for sub_directory in sub_directories:
+    #     path = os.path.join("/www/docker", sub_directory)
+    #     os.makedirs(path, exist_ok=True)
+    #     run_command(f"chown www:www {path}")
 
     # 在 data 目录下创建 web 目录并设置权限
     web_dir_path = os.path.join("/www/docker/data", "web")
