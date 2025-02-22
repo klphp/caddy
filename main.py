@@ -276,9 +276,10 @@ def create_directories_and_set_permissions():
     os.makedirs(web_dir_path, exist_ok=True)
     run_command(f"chown www:www {web_dir_path}")
 
+    copy_caddyfile()
     copy_config_directory()
     copy_index_html()
-    copy_caddyfile()
+
     # 设置 /www/docker 目录权限
     run_command(f"chown -R www:www /www/docker/data/web")
 
