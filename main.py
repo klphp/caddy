@@ -9,14 +9,14 @@ import debian
 import subprocess
 
 
-def run_command(command, shell=True):
-    """运行 shell 命令并返回输出"""
-    process = subprocess.Popen(command, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def run_command(command, shell=True, cwd=None):
+    """运行 shell 命令并返回输出，如果失败则退出程序"""
+    process = subprocess.Popen(command, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
     stdout, stderr = process.communicate()
     if process.returncode != 0:
         print(f"命令执行失败：{command}")
         print(stderr.decode())
-        return None
+        sys.exit(1)  # 退出程序，返回错误码 1
     return stdout.decode()
 
 
@@ -65,25 +65,18 @@ def add_www_user_and_group():
 
 def install_docker_compose():
     """安装 Docker Compose"""
-
-    # 获取 Docker Compose 版本
-    version = "v2.26.1"  # 请根据需要更改版本号
-
-    # 下载 Docker Compose
+    version = "v2.26.1"
     os_name = run_command("uname -s").strip()
     arch = run_command("uname -m").strip()
     url = f"https://github.com/docker/compose/releases/download/{version}/docker-compose-{os_name}-{arch}"
     output_path = "/usr/local/bin/docker-compose"
     response = requests.get(url, stream=True)
-    if response.status_code == 200:
-        with open(output_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-    else:
+    if response.status_code != 200:
         print(f"下载 Docker Compose 失败：{response.status_code}")
-        return
-
-    # 添加执行权限
+        sys.exit(1)  # 退出程序，返回错误码 1
+    with open(output_path, "wb") as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
     run_command(f"sudo chmod +x {output_path}")
 
 
@@ -187,14 +180,19 @@ def docker_compose_up():
 
 
 if __name__ == "__main__":
-    create_directories_and_set_permissions()
+    os_info = get_os_distribution()
 
-os_info = get_os_distribution()
+    if os_info:
+        if os_info.get('ID') == 'ubuntu':
+            print("Ubuntu  Docker脚本安装中......")
+            ubuntu.install_docker()
+        elif os_info.get('ID') == 'debian':
+            print("Debian Docker安装中......")
+            debian.install_docker()
+        else:
+            print(f"当前系统是 {os_info.get('ID')}")
+            sys.exit(1) # 退出程序，返回错误码 1
 
-if os_info:
-    if os_info.get('ID') == 'ubuntu':
-        print("Ubuntu  Docker脚本安装中......")
-        ubuntu.install_docker()
         install_docker_compose()
         add_user_to_docker_group()
         add_www_user_and_group()
@@ -206,29 +204,9 @@ if os_info:
         registry = "registry.cn-hangzhou.aliyuncs.com"
         docker_login(username, password, registry)
 
-        # 登录成功后，继续执行后续代码
-        print("Docker 登录成功，继续执行后续操作...")
-        docker_compose_up()
-
-    elif os_info.get('ID') == 'debian':
-        print("Debian Docker安装中......")
-        debian.install_docker()
-        install_docker_compose()
-        add_user_to_docker_group()
-        add_www_user_and_group()
-        create_directories_and_set_permissions()
-        copy_docker_compose_and_set_permissions()
-
-        username = ""
-        password = ""
-        registry = "registry.cn-hangzhou.aliyuncs.com"
-        docker_login(username, password, registry)
-
-        # 登录成功后，继续执行后续代码
         print("Docker 登录成功，继续执行后续操作...")
         docker_compose_up()
 
     else:
-        print(f"当前系统是 {os_info.get('ID')}")
-else:
-    print("无法获取系统信息")
+        print("无法获取系统信息")
+        sys.exit(1) # 退出程序，返回错误码 1
