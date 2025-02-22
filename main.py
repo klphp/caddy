@@ -9,6 +9,7 @@ import subprocess
 
 def run_command(command, shell=True, cwd=None):
     """运行 shell 命令并返回输出，如果失败则退出程序"""
+    print(command)
     process = subprocess.Popen(command, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
     stdout, stderr = process.communicate()
     if process.returncode != 0:
