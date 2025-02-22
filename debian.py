@@ -48,13 +48,11 @@ def install_docker():
     run_command(f"echo '{repo}' | tee /etc/apt/sources.list.d/docker.list")
 
     # 更新软件包列表
-    run_command("apt-get update")
+    run_command("apt update -y")
 
     # 安装 Docker
     run_command("apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin")
 
-    # 检查 Docker 服务状态
-    run_command("systemctl status docker")
 
     # 设置 Docker 开机启动
     run_command("systemctl start docker")

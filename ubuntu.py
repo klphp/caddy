@@ -61,14 +61,8 @@ def install_docker():
     # 安装 Docker
     run_command("apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin")
 
-    # 检查 Docker 服务状态
-    run_command("systemctl status docker")
-
     # 设置 Docker 开机启动
     run_command("systemctl start docker")
     run_command("systemctl enable docker")
-
-
-
     # 重启 Docker 服务
     run_command("systemctl restart docker")
