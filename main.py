@@ -21,6 +21,25 @@ def run_command(command, shell=True, cwd=None):
     print(stdout.decode())  # 添加这一行来打印输出
     return stdout.decode()
 
+def check_and_delete(path):
+    """
+    检查路径是文件还是目录，如果是目录则删除
+    :param path: 目标路径
+    """
+    try:
+        if os.path.exists(path):  # 检查路径是否存在
+            if os.path.isdir(path):  # 判断是否是目录
+                print(f"{path} 是一个目录，正在删除...")
+                shutil.rmtree(path)  # 递归删除目录
+                print(f"目录 {path} 已删除。")
+            elif os.path.isfile(path):  # 判断是否是文件
+                print(f"{path} 是一个文件，无需删除。")
+            else:
+                print(f"{path} 既不是文件也不是目录。")
+        else:
+            print(f"{path} 不存在。")
+    except Exception as e:
+        print(f"删除 {path} 时出错: {e}")
 
 def is_docker_compose_installed():
     """
@@ -233,7 +252,7 @@ def copy_caddyfile():
 
     source_file = "./Caddyfile"
     destination_file = "/www/docker/caddy_config/Caddyfile"
-
+    check_and_delete(destination_file)
     # 检查源文件是否存在
     if not os.path.exists(source_file):
         print(f"错误：源文件 {source_file} 不存在。")
