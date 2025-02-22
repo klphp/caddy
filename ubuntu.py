@@ -1,5 +1,7 @@
 import subprocess
 import os
+import sys
+
 import requests
 
 
@@ -11,7 +13,7 @@ def run_command(command, shell=True, cwd=None):
         print(f"命令执行失败：{command}")
         print(stderr.decode())
         sys.exit(1)  # 退出程序，返回错误码 1
-    print(stdout.decode()) # 添加这一行来打印输出
+    print(stdout.decode())  # 添加这一行来打印输出
     return stdout.decode()
 
 
@@ -54,7 +56,7 @@ def install_docker():
     daemon_json = """{
         "userns-remap": "www",
         "registry-mirrors": ["https://docker.mirrors.ustc.edu.cn/"]
-    }"""
+}"""
     with open("/etc/docker/daemon.json", "w") as f:
         f.write(daemon_json)
 

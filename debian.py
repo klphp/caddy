@@ -1,5 +1,7 @@
 import subprocess
 import os
+import sys
+
 import requests
 
 
@@ -46,7 +48,7 @@ def install_docker():
     daemon_json = """{
         "userns-remap": "root",
         "registry-mirrors": ["http://hub-mirror.c.163.com", "https://docker.mirrors.ustc.edu.cn", "https://registry.docker-cn.com"]
-    }"""
+}"""
     with open("/etc/docker/daemon.json", "w") as f:
         f.write(daemon_json)
 

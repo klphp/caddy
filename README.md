@@ -16,5 +16,5 @@ cd caddy
 pip install -r requirements.txt
 
 5、修改main.py底部帐号密码后执行
-python3 main.py
+sudo python3 main.py
 ```
