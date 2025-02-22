@@ -21,6 +21,21 @@ def run_command(command, shell=True, cwd=None):
 def install_docker():
     """安装 Docker"""
 
+    # 定义源文件和目标文件路径
+    source_file = "daemon.json"
+    destination_file = "/etc/docker/daemon.json"
+
+    # 检查源文件是否存在
+    if os.path.exists(source_file):
+        try:
+            # 复制文件（覆盖目标文件）
+            shutil.copy(source_file, destination_file)
+            print(f"文件已成功复制到 {destination_file}")
+        except Exception as e:
+            print(f"复制文件时出错: {e}")
+    else:
+        print(f"源文件 {source_file} 不存在，请检查路径。")
+
     # 更新和升级软件包
     run_command("apt update -y")
     run_command("apt upgrade -y")
@@ -53,20 +68,7 @@ def install_docker():
     run_command("systemctl start docker")
     run_command("systemctl enable docker")
 
-    # 定义源文件和目标文件路径
-    source_file = "daemon.json"
-    destination_file = "/etc/docker/daemon.json"
 
-    # 检查源文件是否存在
-    if os.path.exists(source_file):
-        try:
-            # 复制文件（覆盖目标文件）
-            shutil.copy(source_file, destination_file)
-            print(f"文件已成功复制到 {destination_file}")
-        except Exception as e:
-            print(f"复制文件时出错: {e}")
-    else:
-        print(f"源文件 {source_file} 不存在，请检查路径。")
 
     # 重启 Docker 服务
     run_command("systemctl restart docker")
