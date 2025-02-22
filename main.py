@@ -15,8 +15,8 @@ def run_command(command, shell=True, cwd=None):
         print(f"命令执行失败：{command}")
         print(stderr.decode())
         sys.exit(1)  # 退出程序，返回错误码 1
+    print(stdout.decode()) # 添加这一行来打印输出
     return stdout.decode()
-
 
 def get_os_distribution():
     """
@@ -42,22 +42,22 @@ def get_os_distribution():
 def add_user_to_docker_group():
     """将用户添加到 docker 组"""
     # 添加 docker 用户组（可能已存在）
-    run_command("sudo groupadd docker")
+    run_command("groupadd docker")
     # 将用户添加到 docker 组
-    run_command(f"sudo usermod -aG docker docker")
+    run_command(f"usermod -aG docker docker")
     # 更新 docker 用户组
     run_command("newgrp docker")
     # 重启 docker 服务
-    run_command("sudo service docker restart")
+    run_command("service docker restart")
     print("docker 用户和用户组已添加。")
 
 
 def add_www_user_and_group():
     """添加 www 用户和用户组"""
     # 添加 www 用户组
-    run_command("sudo groupadd www")
+    run_command("groupadd www")
     # 添加 www 用户，并指定用户组为 www
-    run_command("sudo useradd -m -g www www")
+    run_command("useradd -m -g www www")
     print("www 用户和用户组已添加。")
 
 
@@ -75,7 +75,7 @@ def install_docker_compose():
     with open(output_path, "wb") as f:
         for chunk in response.iter_content(chunk_size=8192):
             f.write(chunk)
-    run_command(f"sudo chmod +x {output_path}")
+    run_command(f"chmod +x {output_path}")
 
 
 def create_directories_and_set_permissions():
@@ -91,15 +91,15 @@ def create_directories_and_set_permissions():
     for sub_directory in sub_directories:
         path = os.path.join("/www/docker", sub_directory)
         os.makedirs(path, exist_ok=True)
-        run_command(f"sudo chown www:www {path}")
+        run_command(f"chown www:www {path}")
 
     # 在 data 目录下创建 web 目录并设置权限
     web_dir_path = os.path.join("/www/docker/data", "web")
     os.makedirs(web_dir_path, exist_ok=True)
-    run_command(f"sudo chown www:www {web_dir_path}")
+    run_command(f"chown www:www {web_dir_path}")
 
     # 设置 /www/docker 目录权限
-    run_command("sudo chown -R www:www /www/docker")
+    run_command("chown -R www:www /www/docker")
 
     print("目录创建和权限设置完成。")
 
@@ -127,7 +127,7 @@ def copy_docker_compose_and_set_permissions():
         return
 
     # 设置文件权限
-    run_command(f"sudo chown www:www {destination_file}")
+    run_command(f"chown www:www {destination_file}")
 
     print(f"文件 {destination_file} 权限设置完成。")
 
@@ -172,7 +172,7 @@ def docker_compose_up():
         return
 
     # 执行 docker-compose up -d 命令
-    run_command("sudo docker-compose up -d", cwd=docker_compose_dir)
+    run_command("docker-compose up -d", cwd=docker_compose_dir)
 
     print("docker-compose up -d 命令执行完成。")
 

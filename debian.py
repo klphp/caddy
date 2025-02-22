@@ -3,14 +3,15 @@ import os
 import requests
 
 
-def run_command(command, shell=True):
-    """运行 shell 命令并返回输出"""
-    process = subprocess.Popen(command, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def run_command(command, shell=True, cwd=None):
+    """运行 shell 命令并返回输出，如果失败则退出程序"""
+    process = subprocess.Popen(command, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
     stdout, stderr = process.communicate()
     if process.returncode != 0:
         print(f"命令执行失败：{command}")
         print(stderr.decode())
-        return None
+        sys.exit(1)  # 退出程序，返回错误码 1
+    print(stdout.decode()) # 添加这一行来打印输出
     return stdout.decode()
 
 
@@ -18,28 +19,28 @@ def install_docker():
     """安装 Docker"""
 
     # 安装 wget 和 sudo
-    run_command("sudo apt install wget sudo -y")
+    run_command("apt install wget -y")
 
     # 添加 Docker GPG 密钥
-    run_command("sudo wget -qO- https://download.docker.com/linux/debian/gpg | sudo apt-key add -")
+    run_command("wget -qO- https://download.docker.com/linux/debian/gpg | apt-key add -")
 
     # 添加 Docker APT 仓库
     release = run_command("lsb_release -cs").strip()
     repo = f"deb [arch=amd64] https://download.docker.com/linux/debian {release} stable"
-    run_command(f"echo '{repo}' | sudo tee /etc/apt/sources.list.d/docker.list")
+    run_command(f"echo '{repo}' | tee /etc/apt/sources.list.d/docker.list")
 
     # 更新软件包列表
-    run_command("sudo apt-get update")
+    run_command("apt-get update")
 
     # 安装 Docker
-    run_command("sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin")
+    run_command("apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin")
 
     # 检查 Docker 服务状态
     run_command("systemctl status docker")
 
     # 设置 Docker 开机启动
-    run_command("sudo systemctl start docker")
-    run_command("sudo systemctl enable docker")
+    run_command("systemctl start docker")
+    run_command("systemctl enable docker")
 
     # 配置 Docker 国内镜像源
     daemon_json = """{
@@ -50,11 +51,10 @@ def install_docker():
         f.write(daemon_json)
 
     # 重启 Docker 服务
-    run_command("sudo systemctl restart docker")
+    run_command("systemctl restart docker")
 
     # 检查 Docker 信息
-    # run_command("sudo docker info")
-
+    # run_command("docker info")
 
 # def install_docker_compose():
 #     """安装 Docker Compose"""
@@ -77,4 +77,4 @@ def install_docker():
 #         return
 #
 #     # 添加执行权限
-#     run_command(f"sudo chmod +x {output_path}")
+#     run_command(f"chmod +x {output_path}")
