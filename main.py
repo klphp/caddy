@@ -178,7 +178,7 @@ def docker_login(username, password, registry):
     """使用 docker login 登录"""
     try:
         process = subprocess.Popen(
-            ['sudo', 'docker', 'login', '--username', username, registry],
+            ['docker', 'login', '--username=' + username,  registry],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
