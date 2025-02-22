@@ -48,6 +48,7 @@ def check_group_exists(group_name):
     except SystemExit:
         return False  # 命令执行失败，说明用户组不存在
 
+
 def check_user_exists(username):
     """检查用户是否存在"""
     try:
@@ -55,6 +56,7 @@ def check_user_exists(username):
         return True  # 命令成功执行，说明用户存在
     except SystemExit:
         return False  # 命令执行失败，说明用户不存在
+
 
 def add_user_to_docker_group():
     """将用户添加到 docker 组"""
@@ -70,7 +72,7 @@ def add_user_to_docker_group():
 
     # 检查用户是否存在，不存在则创建
     if not check_user_exists(username):
-        run_command(f"useradd -m {username}")
+        run_command(f"useradd -m -g {group_name} {username}")  # 使用 -g 参数指定用户组
         print(f"用户 {username} 已创建。")
     else:
         print(f"用户 {username} 已存在，跳过创建。")
@@ -80,6 +82,7 @@ def add_user_to_docker_group():
     # 更新 docker 用户组
     run_command("newgrp docker")
     print(f"用户 {username} 已添加到 {group_name} 组。")
+
 
 def add_www_user_and_group():
     """添加 www 用户和用户组"""
