@@ -125,6 +125,10 @@ def install_docker_compose():
 def create_directories_and_set_permissions():
     """创建目录并设置权限"""
 
+    # 获取当前用户名和用户组名
+    current_user = getpass.getuser()
+    current_group = current_user  # 假设用户组名与用户名相同
+
     # 创建 /www/docker 目录
     os.makedirs("/www/docker", exist_ok=True)
 
@@ -135,15 +139,15 @@ def create_directories_and_set_permissions():
     for sub_directory in sub_directories:
         path = os.path.join("/www/docker", sub_directory)
         os.makedirs(path, exist_ok=True)
-        # run_command(f"chown www:www {path}")
+        run_command(f"chown {current_user}:{current_group} {path}")
 
     # 在 data 目录下创建 web 目录并设置权限
     web_dir_path = os.path.join("/www/docker/data", "web")
     os.makedirs(web_dir_path, exist_ok=True)
-    # run_command(f"chown www:www {web_dir_path}")
+    run_command(f"chown www:www {web_dir_path}")
 
     # 设置 /www/docker 目录权限
-    run_command("chown -R www:www /www/docker/data/web")
+    run_command(f"chown -R www:www /www/docker/data/web")
 
     print("目录创建和权限设置完成。")
 
