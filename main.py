@@ -22,6 +22,20 @@ def run_command(command, shell=True, cwd=None):
     return stdout.decode()
 
 
+def docker_compose_up():
+    """在 /www/docker 目录下执行 docker-compose up -d"""
+    # 切换到 /www/docker 目录
+    docker_compose_dir = "/www/docker"
+    # 检查 docker-compose.yaml 文件是否存在
+    if not os.path.exists(os.path.join(docker_compose_dir, "docker-compose.yaml")):
+        print("错误：docker-compose.yaml 文件不存在。")
+        return
+    # 执行 docker-compose up -d 命令
+    print("docker-compose 容器正在启动，由于拉取仓库取决于带宽，可能需要几分钟，请稍候......")
+    run_command("docker-compose up -d", cwd=docker_compose_dir)
+    print("docker-compose up -d 命令执行完成。")
+
+
 def get_os_distribution():
     """
     获取 Linux 发行版信息。
@@ -219,23 +233,6 @@ def docker_login(registry, username, password=None):
     except Exception as e:
         print(f"执行命令时出错: {e}")
         sys.exit(1)
-
-
-def docker_compose_up():
-    """在 /www/docker 目录下执行 docker-compose up -d"""
-
-    # 切换到 /www/docker 目录
-    docker_compose_dir = "/www/docker"
-
-    # 检查 docker-compose.yaml 文件是否存在
-    if not os.path.exists(os.path.join(docker_compose_dir, "docker-compose.yaml")):
-        print("错误：docker-compose.yaml 文件不存在。")
-        return
-
-    # 执行 docker-compose up -d 命令
-    run_command("docker-compose up -d", cwd=docker_compose_dir)
-
-    print("docker-compose up -d 命令执行完成。")
 
 
 if __name__ == "__main__":
