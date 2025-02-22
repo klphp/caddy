@@ -1,0 +1,8 @@
+http://localhost {
+	root * /var/www/html
+	# 开启压缩
+	encode zstd gzip
+	php_fastcgi php82:9000
+	file_server
+	try_files {path} {path}/ /index.php?{$query}
+}

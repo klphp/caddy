@@ -1,0 +1,75 @@
+version: '3'
+services:
+  # redis-yyuit:
+  #   image: 'registry.cn-hangzhou.aliyuncs.com/hi121/redis:v1'
+  #   restart: always
+  #   volumes:
+  #     - './data/dbs/redis/yyuit:/data'
+  #   networks:
+  #     - lnmp
+  # mysql:
+  #   image: mysql:5.7
+  #   container_name: mysql
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: 你的mysql密码 # replace with your password
+  #   volumes:
+  #     - ./data/dbs/mysql:/var/lib/mysql # replace with your mysql data directory
+  #     - ./config/mysql/etc/my.cnf:/etc/my.cnf
+  #     - ./logs/mysql:/var/log/mysql
+  #   ports:
+  #     - '127.0.0.1:3306:3306'
+  #   networks:
+  #     - lnmp
+  caddy:
+    image: registry.cn-hangzhou.aliyuncs.com/hi121/caddy:v1
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./caddy_config/Caddyfile:/etc/caddy/Caddyfile
+      - web_data:/var/www/html
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - lnmp
+  php82:
+    image: registry.cn-hangzhou.aliyuncs.com/hi121/php82:v6
+    restart: always
+    volumes:
+      - web_data:/var/www/html
+      - ./logs:/var/logs
+    networks:
+      - lnmp
+  # php72:
+  #   image: registry.cn-hangzhou.aliyuncs.com/hi121/php72:v3
+  #   restart: always
+  #   user: root
+  #   volumes:
+  #     - web_data:/var/www/html
+  #     - ./logs:/var/logs
+  #   networks:
+  #     - lnmp
+networks:
+  lnmp:
+volumes:
+  web_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/web
+  caddy_config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./caddy_config
+  caddy_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./caddy_data
