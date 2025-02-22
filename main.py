@@ -15,8 +15,9 @@ def run_command(command, shell=True, cwd=None):
         print(f"命令执行失败：{command}")
         print(stderr.decode())
         sys.exit(1)  # 退出程序，返回错误码 1
-    print(stdout.decode()) # 添加这一行来打印输出
+    print(stdout.decode())  # 添加这一行来打印输出
     return stdout.decode()
+
 
 def get_os_distribution():
     """
@@ -39,26 +40,64 @@ def get_os_distribution():
     return os_info
 
 
+def check_group_exists(group_name):
+    """检查用户组是否存在"""
+    result = run_command(f"getent group {group_name}")
+    return result.returncode == 0
+
+
+def check_user_exists(username):
+    """检查用户是否存在"""
+    result = run_command(f"id -u {username}")
+    return result.returncode == 0
+
+
 def add_user_to_docker_group():
     """将用户添加到 docker 组"""
-    # 添加 docker 用户组（可能已存在）
-    run_command("groupadd docker")
+    username = "docker"  # 要添加的用户名
+    group_name = "docker"  # 要添加的用户组名
+
+    # 检查 docker 用户组是否存在，不存在则创建
+    if not check_group_exists(group_name):
+        run_command("groupadd docker")
+        print(f"用户组 {group_name} 已创建。")
+    else:
+        print(f"用户组 {group_name} 已存在，跳过创建。")
+
+    # 检查用户是否存在，不存在则创建
+    if not check_user_exists(username):
+        run_command(f"useradd -m {username}")
+        print(f"用户 {username} 已创建。")
+    else:
+        print(f"用户 {username} 已存在，跳过创建。")
+
     # 将用户添加到 docker 组
-    run_command(f"usermod -aG docker docker")
+    run_command(f"usermod -aG docker {username}")
     # 更新 docker 用户组
     run_command("newgrp docker")
     # 重启 docker 服务
     run_command("service docker restart")
-    print("docker 用户和用户组已添加。")
+    print(f"用户 {username} 已添加到 {group_name} 组。")
 
 
 def add_www_user_and_group():
     """添加 www 用户和用户组"""
-    # 添加 www 用户组
-    run_command("groupadd www")
-    # 添加 www 用户，并指定用户组为 www
-    run_command("useradd -m -g www www")
-    print("www 用户和用户组已添加。")
+    username = "www"  # 要添加的用户名
+    group_name = "www"  # 要添加的用户组名
+
+    # 检查 www 用户组是否存在，不存在则创建
+    if not check_group_exists(group_name):
+        run_command("groupadd www")
+        print(f"用户组 {group_name} 已创建。")
+    else:
+        print(f"用户组 {group_name} 已存在，跳过创建。")
+
+    # 检查用户是否存在，不存在则创建
+    if not check_user_exists(username):
+        run_command(f"useradd -m -g {group_name} {username}")
+        print(f"用户 {username} 已创建。")
+    else:
+        print(f"用户 {username} 已存在，跳过创建。")
 
 
 def install_docker_compose():
@@ -191,7 +230,7 @@ if __name__ == "__main__":
             debian.install_docker()
         else:
             print(f"当前系统是 {os_info.get('ID')}")
-            sys.exit(1) # 退出程序，返回错误码 1
+            sys.exit(1)  # 退出程序，返回错误码 1
 
         install_docker_compose()
         create_directories_and_set_permissions()
@@ -207,4 +246,4 @@ if __name__ == "__main__":
 
     else:
         print("无法获取系统信息")
-        sys.exit(1) # 退出程序，返回错误码 1
+        sys.exit(1)  # 退出程序，返回错误码 1
