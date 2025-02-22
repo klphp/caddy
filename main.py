@@ -177,6 +177,41 @@ def copy_caddyfile():
     except Exception as e:
         print(f"文件复制失败：{e}")
 
+def copy_config_directory():
+    """复制 config 目录到 /www/docker/config 目录，存在则跳过"""
+
+    source_dir = "./config"
+    destination_dir = "/www/docker/config"
+
+    # 检查源目录是否存在
+    if not os.path.exists(source_dir):
+        print(f"错误：源目录 {source_dir} 不存在。")
+        return
+
+    # 确保目标目录存在
+    if not os.path.exists(destination_dir):
+        os.makedirs(destination_dir)
+
+    # 遍历源目录中的所有文件和目录
+    for item in os.listdir(source_dir):
+        source_item_path = os.path.join(source_dir, item)
+        destination_item_path = os.path.join(destination_dir, item)
+
+        # 检查目标文件或目录是否已存在
+        if os.path.exists(destination_item_path):
+            print(f"目标 {destination_item_path} 已存在，跳过复制。")
+            continue
+
+        # 复制文件或目录
+        try:
+            if os.path.isfile(source_item_path):
+                shutil.copy2(source_item_path, destination_item_path)
+            elif os.path.isdir(source_item_path):
+                shutil.copytree(source_item_path, destination_item_path)
+            print(f"{source_item_path} 复制到 {destination_item_path} 成功。")
+        except Exception as e:
+            print(f"{source_item_path} 复制失败：{e}")
+
 def create_directories_and_set_permissions():
     """创建目录并设置权限"""
 
@@ -201,6 +236,7 @@ def create_directories_and_set_permissions():
     os.makedirs(web_dir_path, exist_ok=True)
     run_command(f"chown www:www {web_dir_path}")
 
+    copy_config_directory()
     copy_index_html()
     copy_caddyfile()
     # 设置 /www/docker 目录权限
