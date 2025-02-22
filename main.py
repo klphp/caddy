@@ -154,6 +154,28 @@ def copy_index_html():
     except Exception as e:
         print(f"文件复制失败：{e}")
 
+def copy_caddyfile():
+    """复制 Caddyfile 到 /www/docker/caddy_config 目录，存在则跳过"""
+
+    source_file = "./Caddyfile"
+    destination_file = "/www/docker/caddy_config/Caddyfile"
+
+    # 检查源文件是否存在
+    if not os.path.exists(source_file):
+        print(f"错误：源文件 {source_file} 不存在。")
+        return
+
+    # 检查目标文件是否已存在
+    if os.path.exists(destination_file):
+        print(f"目标文件 {destination_file} 已存在，跳过复制。")
+        return
+
+    # 复制文件
+    try:
+        shutil.copy2(source_file, destination_file)
+        print(f"文件 {source_file} 复制到 {destination_file} 成功。")
+    except Exception as e:
+        print(f"文件复制失败：{e}")
 
 def create_directories_and_set_permissions():
     """创建目录并设置权限"""
@@ -180,6 +202,7 @@ def create_directories_and_set_permissions():
     run_command(f"chown www:www {web_dir_path}")
 
     copy_index_html()
+    copy_caddyfile()
     # 设置 /www/docker 目录权限
     run_command(f"chown -R www:www /www/docker/data/web")
 
