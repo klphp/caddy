@@ -1,3 +1,4 @@
+import shutil
 import subprocess
 import os
 import sys
@@ -52,13 +53,20 @@ def install_docker():
     run_command("systemctl start docker")
     run_command("systemctl enable docker")
 
-    # 配置 Docker 国内镜像源（中科大）
-    daemon_json = """{
-        "userns-remap": "www",
-        "registry-mirrors": ["https://docker.mirrors.ustc.edu.cn/"]
-}"""
-    with open("/etc/docker/daemon.json", "w") as f:
-        f.write(daemon_json)
+    # 定义源文件和目标文件路径
+    source_file = "daemon.json"
+    destination_file = "/etc/docker/daemon.json"
+
+    # 检查源文件是否存在
+    if os.path.exists(source_file):
+        try:
+            # 复制文件（覆盖目标文件）
+            shutil.copy(source_file, destination_file)
+            print(f"文件已成功复制到 {destination_file}")
+        except Exception as e:
+            print(f"复制文件时出错: {e}")
+    else:
+        print(f"源文件 {source_file} 不存在，请检查路径。")
 
     # 重启 Docker 服务
     run_command("systemctl restart docker")
