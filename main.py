@@ -132,10 +132,10 @@ def create_directories_and_set_permissions():
     sub_directories = ["caddy_config", "caddy_data", "config", "data", "logs"]
 
     # 创建子目录并设置权限
-    # for sub_directory in sub_directories:
-    #     path = os.path.join("/www/docker", sub_directory)
-    #     os.makedirs(path, exist_ok=True)
-    #     run_command(f"chown www:www {path}")
+    for sub_directory in sub_directories:
+        path = os.path.join("/www/docker", sub_directory)
+        os.makedirs(path, exist_ok=True)
+        # run_command(f"chown www:www {path}")
 
     # 在 data 目录下创建 web 目录并设置权限
     web_dir_path = os.path.join("/www/docker/data", "web")
@@ -178,17 +178,17 @@ def copy_docker_compose_and_set_permissions():
 
 def docker_login(registry, username, password=None):
     """
-     登录 Docker 私有仓库
-     :param registry: 仓库地址（如 registry.cn-hangzhou.aliyuncs.com）
-     :param username: 用户名
-     :param password: 密码（如果未提供，则提示用户输入）
-     """
+    登录 Docker 私有仓库
+    :param registry: 仓库地址（如 registry.cn-hangzhou.aliyuncs.com）
+    :param username: 用户名
+    :param password: 密码（如果未提供，则提示用户输入）
+    """
     # 如果未提供密码，提示用户输入
     if password is None:
         password = getpass.getpass("请输入 Docker 仓库密码: ")
 
     # 构建 docker login 命令
-    command = f"sudo docker login --username={username} {registry}"
+    command = f"sudo docker login --username={username} --password-stdin {registry}"
 
     try:
         # 使用 subprocess 运行命令，并通过管道输入密码
