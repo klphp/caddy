@@ -22,6 +22,43 @@ def run_command(command, shell=True, cwd=None):
     return stdout.decode()
 
 
+def get_public_ip():
+    """
+    获取公网 IP
+    :return: 公网 IP 地址
+    """
+    try:
+        response = requests.get("https://api.ipify.org")
+        response.raise_for_status()  # 检查请求是否成功
+        return response.text
+    except requests.RequestException as e:
+        print(f"获取公网 IP 失败: {e}")
+        return None
+
+
+def replace_ip_in_caddyfile(ip, file_path="Caddyfile"):
+    """
+    替换 Caddyfile 中的 [ip] 为实际公网 IP
+    :param ip: 公网 IP 地址
+    :param file_path: Caddyfile 文件路径
+    """
+    try:
+        # 读取文件内容
+        with open(file_path, "r", encoding="utf-8") as file:
+            content = file.read()
+
+        # 替换 [ip] 为实际公网 IP
+        new_content = content.replace("[ip]", ip)
+
+        # 写回文件
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(new_content)
+
+        print(f"已将 {file_path} 中的 [ip] 替换为 {ip}。")
+    except Exception as e:
+        print(f"替换文件内容时出错: {e}")
+
+
 def docker_compose_up():
     """在 /www/docker 目录下执行 docker-compose up -d"""
     # 切换到 /www/docker 目录
@@ -154,6 +191,7 @@ def copy_index_html():
     except Exception as e:
         print(f"文件复制失败：{e}")
 
+
 def copy_caddyfile():
     """复制 Caddyfile 到 /www/docker/caddy_config 目录，存在则跳过"""
 
@@ -176,6 +214,7 @@ def copy_caddyfile():
         print(f"文件 {source_file} 复制到 {destination_file} 成功。")
     except Exception as e:
         print(f"文件复制失败：{e}")
+
 
 def copy_config_directory():
     """复制 config 目录到 /www/docker/config 目录，存在则跳过"""
@@ -211,6 +250,7 @@ def copy_config_directory():
             print(f"{source_item_path} 复制到 {destination_item_path} 成功。")
         except Exception as e:
             print(f"{source_item_path} 复制失败：{e}")
+
 
 def create_directories_and_set_permissions():
     """创建目录并设置权限"""
@@ -315,6 +355,13 @@ def docker_login(registry, username, password=None):
 
 
 if __name__ == "__main__":
+    # 获取公网 IP
+    public_ip = get_public_ip()
+    if public_ip:
+        # 替换 Caddyfile 中的 [ip]
+        replace_ip_in_caddyfile(public_ip)
+
+    # 获取系统信息
     os_info = get_os_distribution()
 
     if os_info:

@@ -1,4 +1,15 @@
-http://localhost {
+# 域名访问配置，phpmyadmin等
+#http://[ip]:80 {
+#    handle /__phpmyadmin/* {
+#	root * /var/www/html
+#	file_server
+#        php_fastcgi php82:9000
+#    }
+#    handle {
+#        respond "Unauthorized access" 403
+#    }
+#}
+http://[ip] {
 	root * /var/www/html
 	# 开启压缩
 	encode zstd gzip
