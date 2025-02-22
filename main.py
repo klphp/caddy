@@ -80,8 +80,6 @@ def add_user_to_docker_group():
 
     # 将用户添加到 docker 组
     run_command(f"usermod -aG docker {username}")
-    # 更新 docker 用户组
-    run_command("newgrp docker")
     print(f"用户 {username} 已添加到 {group_name} 组。")
 
 
@@ -249,6 +247,9 @@ if __name__ == "__main__":
         print("Docker 登录成功，继续执行后续操作...")
         docker_compose_up()
 
+        print("请手动以下命令：")
+        print("newgrp docker")
+        print("sudo systemctl start docker")
     else:
         print("无法获取系统信息")
         sys.exit(1)  # 退出程序，返回错误码 1
