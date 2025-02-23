@@ -9,6 +9,13 @@
 #        respond "Unauthorized access" 403
 #    }
 #}
+#www.baidu.com {
+#	root * /var/www/html/baidu
+#	encode zstd gzip
+#	file_server
+#	try_files {path} {path}/ /index.php?{query}
+#	php_fastcgi php82:9000
+#}
 http://[ip] {
 	root * /var/www/html
 	# 开启压缩
