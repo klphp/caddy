@@ -220,7 +220,7 @@ def install_docker_compose():
 
 def replace_ip_in_caddyfile(ip):
 
-    source_file = "./Caddyfile"
+    source_file = "Caddyfile"
     destination_file = "/www/docker/caddy_config/Caddyfile"
     ip_address = ip
 
@@ -279,8 +279,8 @@ def create_directories_and_set_permissions():
     os.makedirs(web_dir_path, exist_ok=True)
     run_command(f"chown www:www {web_dir_path}")
 
-    utils.copy_item("./config", "/www/docker/config", overwrite=False)
-    utils.copy_item("./index.html", "/www/docker/data/web/index.html", overwrite=True)
+    utils.copy_item("config", "/www/docker/config", overwrite=False)
+    utils.copy_item("index.html", "/www/docker/data/web/index.html", overwrite=True)
 
     # 设置 /www/docker 目录权限
     run_command(f"chown -R www:www /www/docker/data/web")
@@ -292,7 +292,7 @@ def copy_docker_compose_and_set_permissions():
     """复制 docker-compose.yaml 并设置权限"""
 
     # 源文件路径
-    source_file = "./docker-compose.yaml"
+    source_file = "docker-compose.yaml"
     # 目标文件路径
     destination_file = "/www/docker/docker-compose.yaml"
     utils.copy_item(source_file, destination_file, overwrite=True)
