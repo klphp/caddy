@@ -219,7 +219,8 @@ def install_docker_compose():
 
 
 def replace_ip_in_caddyfile(ip):
-
+    directory_to_clear = "/www/docker/caddy_config/"
+    utils.clear_directory(directory_to_clear)
     source_file = "Caddyfile"
     destination_file = "/www/docker/caddy_config/Caddyfile"
     ip_address = ip
@@ -230,16 +231,6 @@ def replace_ip_in_caddyfile(ip):
         return
 
     try:
-        # 检查目标路径是否存在
-        if os.path.exists(destination_file):
-            if os.path.isfile(destination_file):
-                # 目标文件存在，清空文件内容
-                with open(destination_file, "w") as f:
-                    f.truncate(0)  # 清空文件内容
-            elif os.path.isdir(destination_file):
-                # 目标路径是目录，删除目录
-                shutil.rmtree(destination_file)
-
         # 读取源文件内容
         with open(source_file, "r") as f:
             content = f.read()
@@ -346,6 +337,8 @@ def docker_login(registry, username, password=None):
 if __name__ == "__main__":
     # 获取公网 IP
     public_ip = get_and_confirm_ip()
+    create_directories_and_set_permissions()
+    replace_ip_in_caddyfile(public_ip)
     if public_ip:
         # 检查 docker-compose 是否已安装
         if is_docker_compose_installed():
@@ -370,8 +363,6 @@ if __name__ == "__main__":
                 sys.exit(1)  # 退出程序，返回错误码 1
 
             install_docker_compose()
-            create_directories_and_set_permissions()
-            replace_ip_in_caddyfile(public_ip)
             copy_docker_compose_and_set_permissions()
 
             username = "5735570@qq.com"

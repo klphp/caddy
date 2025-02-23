@@ -23,3 +23,32 @@ def copy_item(source, destination, overwrite=False):
         print(f"{source} 复制到 {destination} 成功。")
     except Exception as e:
         print(f"{source} 复制失败：{e}")
+
+
+def clear_directory(directory):
+    """清空指定目录下的所有文件和文件夹"""
+
+    # 检查目录是否存在
+    if not os.path.exists(directory):
+        print(f"错误：目录 {directory} 不存在。")
+        return
+
+    # 检查目录是否是目录
+    if not os.path.isdir(directory):
+        print(f"错误：{directory} 不是一个目录。")
+        return
+
+    try:
+        # 遍历目录下的所有文件和文件夹
+        for filename in os.listdir(directory):
+            file_path = os.path.join(directory, filename)
+
+            # 判断是文件还是文件夹
+            if os.path.isfile(file_path):
+                os.unlink(file_path)  # 删除文件
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)  # 删除文件夹
+
+        print(f"目录 {directory} 已清空。")
+    except Exception as e:
+        print(f"清空目录 {directory} 时出错：{e}")
