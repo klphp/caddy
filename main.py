@@ -102,27 +102,6 @@ def get_and_confirm_ip():
             print("无效的输入，请重新确认。")
 
 
-def replace_ip_in_caddyfile(ip, file_path="Caddyfile"):
-    """
-    替换 Caddyfile 中的 [ip] 为实际公网 IP
-    :param ip: 公网 IP 地址
-    :param file_path: Caddyfile 文件路径
-    """
-    try:
-        # 读取文件内容
-        with open(file_path, "r", encoding="utf-8") as file:
-            content = file.read()
-
-        # 替换 [ip] 为实际公网 IP
-        new_content = content.replace("[ip]", ip)
-
-        # 写回文件
-        with open(file_path, "w", encoding="utf-8") as file:
-            file.write(new_content)
-
-        print(f"已将 {file_path} 中的 [ip] 替换为 {ip}。")
-    except Exception as e:
-        print(f"替换文件内容时出错: {e}")
 
 
 def docker_compose_up():
@@ -239,6 +218,43 @@ def install_docker_compose():
     run_command(f"chmod +x {output_path}")
 
 
+def replace_ip_in_caddyfile(ip):
+
+    source_file = "./Caddyfile"
+    destination_file = "/www/docker/caddy_config/Caddyfile"
+    ip_address = ip
+
+    # 检查源文件是否存在
+    if not os.path.exists(source_file):
+        print(f"错误：源文件 {source_file} 不存在。")
+        return
+
+    try:
+        # 检查目标路径是否存在
+        if os.path.exists(destination_file):
+            if os.path.isfile(destination_file):
+                # 目标文件存在，清空文件内容
+                with open(destination_file, "w") as f:
+                    f.truncate(0)  # 清空文件内容
+            elif os.path.isdir(destination_file):
+                # 目标路径是目录，删除目录
+                shutil.rmtree(destination_file)
+
+        # 读取源文件内容
+        with open(source_file, "r") as f:
+            content = f.read()
+
+        # 替换 [ip] 为 127.0.0.1
+        new_content = content.replace("[ip]", ip_address)
+
+        # 写入目标文件
+        with open(destination_file, "w") as f:
+            f.write(new_content)
+
+        print(f"已将 {source_file} 中的 [ip] 替换为 {ip_address}，并写入 {destination_file}。")
+    except Exception as e:
+        print(f"替换文件内容或写入文件时出错：{e}")
+
 def create_directories_and_set_permissions():
     """创建目录并设置权限"""
 
@@ -263,7 +279,6 @@ def create_directories_and_set_permissions():
     os.makedirs(web_dir_path, exist_ok=True)
     run_command(f"chown www:www {web_dir_path}")
 
-    utils.copy_item("./Caddyfile", "/www/docker/caddy_config/Caddyfile", overwrite=True)
     utils.copy_item("./config", "/www/docker/config", overwrite=False)
     utils.copy_item("./index.html", "/www/docker/data/web/index.html", overwrite=True)
 
@@ -332,46 +347,44 @@ if __name__ == "__main__":
     # 获取公网 IP
     public_ip = get_and_confirm_ip()
     if public_ip:
-        # 替换 Caddyfile 中的 [ip]
-        replace_ip_in_caddyfile(public_ip)
-
         # 检查 docker-compose 是否已安装
-    if is_docker_compose_installed():
-        print("docker-compose 已安装。")
-        # 停止 /www/docker 目录下的容器
-        stop_docker_compose_containers("/www/docker")
+        if is_docker_compose_installed():
+            print("docker-compose 已安装。")
+            # 停止 /www/docker 目录下的容器
+            stop_docker_compose_containers("/www/docker")
 
-    # 获取系统信息
-    os_info = get_os_distribution()
+        # 获取系统信息
+        os_info = get_os_distribution()
 
-    if os_info:
-        add_user_to_docker_group()
-        add_www_user_and_group()
-        if os_info.get('ID') == 'ubuntu':
-            print("Ubuntu  Docker脚本安装中......")
-            ubuntu.install_docker()
-        elif os_info.get('ID') == 'debian':
-            print("Debian Docker安装中......")
-            debian.install_docker()
+        if os_info:
+            add_user_to_docker_group()
+            add_www_user_and_group()
+            if os_info.get('ID') == 'ubuntu':
+                print("Ubuntu  Docker脚本安装中......")
+                ubuntu.install_docker()
+            elif os_info.get('ID') == 'debian':
+                print("Debian Docker安装中......")
+                debian.install_docker()
+            else:
+                print(f"当前系统是 {os_info.get('ID')}")
+                sys.exit(1)  # 退出程序，返回错误码 1
+
+            install_docker_compose()
+            create_directories_and_set_permissions()
+            replace_ip_in_caddyfile(public_ip)
+            copy_docker_compose_and_set_permissions()
+
+            username = "5735570@qq.com"
+            registry = "registry.cn-hangzhou.aliyuncs.com"
+            docker_login(registry, username)
+
+            print("Docker 登录成功，继续执行后续操作...")
+            docker_compose_up()
+
+            print("请手动以下命令：")
+            print("newgrp docker")
+            print("sudo systemctl restart docker")
+            print("出于安全考虑，全部安装完成后建议删除本程序的安装目录")
         else:
-            print(f"当前系统是 {os_info.get('ID')}")
+            print("无法获取系统信息")
             sys.exit(1)  # 退出程序，返回错误码 1
-
-        install_docker_compose()
-        create_directories_and_set_permissions()
-        copy_docker_compose_and_set_permissions()
-
-        username = "5735570@qq.com"
-        registry = "registry.cn-hangzhou.aliyuncs.com"
-        docker_login(registry, username)
-
-        print("Docker 登录成功，继续执行后续操作...")
-        docker_compose_up()
-
-        print("请手动以下命令：")
-        print("newgrp docker")
-        print("sudo systemctl restart docker")
-        print("出于安全考虑，全部安装完成后建议删除本程序的安装目录")
-    else:
-        print("无法获取系统信息")
-        sys.exit(1)  # 退出程序，返回错误码 1
