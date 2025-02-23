@@ -1,8 +1,9 @@
 import os
+import re
 import shutil
 import sys
 import getpass
-
+import utils
 import requests
 import ubuntu
 import debian
@@ -20,6 +21,7 @@ def run_command(command, shell=True, cwd=None):
         sys.exit(1)  # 退出程序，返回错误码 1
     print(stdout.decode())  # 添加这一行来打印输出
     return stdout.decode()
+
 
 def check_and_delete(path):
     """
@@ -41,6 +43,7 @@ def check_and_delete(path):
     except Exception as e:
         print(f"删除 {path} 时出错: {e}")
 
+
 def is_docker_compose_installed():
     """
     检查 docker-compose 是否已安装
@@ -58,6 +61,7 @@ def is_docker_compose_installed():
     except FileNotFoundError:
         # 如果 docker-compose 命令不存在，返回 False
         return False
+
 
 def stop_docker_compose_containers(directory):
     """
@@ -77,18 +81,25 @@ def stop_docker_compose_containers(directory):
     except Exception as e:
         print(f"执行命令时出错: {e}")
 
-def get_public_ip():
-    """
-    获取公网 IP
-    :return: 公网 IP 地址
-    """
-    try:
-        response = requests.get("https://api.ipify.org")
-        response.raise_for_status()  # 检查请求是否成功
-        return response.text
-    except requests.RequestException as e:
-        print(f"获取公网 IP 失败: {e}")
-        return None
+
+def get_and_confirm_ip():
+    """获取用户输入的 IP 地址并确认"""
+
+    while True:
+        ip_address = input("服务器环境请填写公网ip，内网环境请填写内网ip：")
+
+        # 去除两侧多余字符（空格、引号等）
+        ip_address = ip_address.strip()
+
+        # 提示用户确认
+        confirmation = input(f"您输入的 IP 地址是：{ip_address}，是否正确？(y/n): ")
+
+        if confirmation.lower() == 'y':
+            return ip_address
+        elif confirmation.lower() == 'n':
+            print("请重新输入 IP 地址。")
+        else:
+            print("无效的输入，请重新确认。")
 
 
 def replace_ip_in_caddyfile(ip, file_path="Caddyfile"):
@@ -228,85 +239,6 @@ def install_docker_compose():
     run_command(f"chmod +x {output_path}")
 
 
-def copy_index_html():
-    """复制 index.html 到 /www/docker/data/web 目录，存在则覆盖"""
-
-    source_file = "./index.html"
-    destination_file = "/www/docker/data/web/index.html"
-
-    # 检查源文件是否存在
-    if not os.path.exists(source_file):
-        print(f"错误：源文件 {source_file} 不存在。")
-        return
-
-    # 复制文件，存在则覆盖
-    try:
-        shutil.copy2(source_file, destination_file)
-        print(f"文件 {source_file} 复制到 {destination_file} 成功。")
-    except Exception as e:
-        print(f"文件复制失败：{e}")
-
-
-def copy_caddyfile():
-    """复制 Caddyfile 到 /www/docker/caddy_config 目录，存在则跳过"""
-
-    source_file = "./Caddyfile"
-    destination_file = "/www/docker/caddy_config/Caddyfile"
-    check_and_delete(destination_file)
-    # 检查源文件是否存在
-    if not os.path.exists(source_file):
-        print(f"错误：源文件 {source_file} 不存在。")
-        return
-
-    # 检查目标文件是否已存在
-    if os.path.exists(destination_file):
-        print(f"目标文件 {destination_file} 已存在，跳过复制。")
-        return
-
-    # 复制文件
-    try:
-        shutil.copy2(source_file, destination_file)
-        print(f"文件 {source_file} 复制到 {destination_file} 成功。")
-    except Exception as e:
-        print(f"文件复制失败：{e}")
-
-
-def copy_config_directory():
-    """复制 config 目录到 /www/docker/config 目录，存在则跳过"""
-
-    source_dir = "./config"
-    destination_dir = "/www/docker/config"
-
-    # 检查源目录是否存在
-    if not os.path.exists(source_dir):
-        print(f"错误：源目录 {source_dir} 不存在。")
-        return
-
-    # 确保目标目录存在
-    if not os.path.exists(destination_dir):
-        os.makedirs(destination_dir)
-
-    # 遍历源目录中的所有文件和目录
-    for item in os.listdir(source_dir):
-        source_item_path = os.path.join(source_dir, item)
-        destination_item_path = os.path.join(destination_dir, item)
-
-        # 检查目标文件或目录是否已存在
-        if os.path.exists(destination_item_path):
-            print(f"目标 {destination_item_path} 已存在，跳过复制。")
-            continue
-
-        # 复制文件或目录
-        try:
-            if os.path.isfile(source_item_path):
-                shutil.copy2(source_item_path, destination_item_path)
-            elif os.path.isdir(source_item_path):
-                shutil.copytree(source_item_path, destination_item_path)
-            print(f"{source_item_path} 复制到 {destination_item_path} 成功。")
-        except Exception as e:
-            print(f"{source_item_path} 复制失败：{e}")
-
-
 def create_directories_and_set_permissions():
     """创建目录并设置权限"""
 
@@ -331,9 +263,9 @@ def create_directories_and_set_permissions():
     os.makedirs(web_dir_path, exist_ok=True)
     run_command(f"chown www:www {web_dir_path}")
 
-    copy_caddyfile()
-    copy_config_directory()
-    copy_index_html()
+    utils.copy_item("./Caddyfile", "/www/docker/caddy_config/Caddyfile", overwrite=True)
+    utils.copy_item("./config", "/www/docker/config", overwrite=False)
+    utils.copy_item("./index.html", "/www/docker/data/web/index.html", overwrite=True)
 
     # 设置 /www/docker 目录权限
     run_command(f"chown -R www:www /www/docker/data/web")
@@ -346,23 +278,9 @@ def copy_docker_compose_and_set_permissions():
 
     # 源文件路径
     source_file = "./docker-compose.yaml"
-
     # 目标文件路径
     destination_file = "/www/docker/docker-compose.yaml"
-
-    # 检查源文件是否存在
-    if not os.path.exists(source_file):
-        print(f"错误：源文件 {source_file} 不存在。")
-        return
-
-    # 复制文件
-    try:
-        shutil.copy2(source_file, destination_file)
-        print(f"文件 {source_file} 复制到 {destination_file} 成功。")
-    except Exception as e:
-        print(f"文件复制失败：{e}")
-        return
-
+    utils.copy_item(source_file, destination_file, overwrite=True)
     # 设置文件权限
     run_command(f"chown www:www {destination_file}")
 
@@ -412,7 +330,7 @@ def docker_login(registry, username, password=None):
 
 if __name__ == "__main__":
     # 获取公网 IP
-    public_ip = get_public_ip()
+    public_ip = get_and_confirm_ip()
     if public_ip:
         # 替换 Caddyfile 中的 [ip]
         replace_ip_in_caddyfile(public_ip)
