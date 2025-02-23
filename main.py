@@ -337,8 +337,6 @@ def docker_login(registry, username, password=None):
 if __name__ == "__main__":
     # 获取公网 IP
     public_ip = get_and_confirm_ip()
-    create_directories_and_set_permissions()
-    replace_ip_in_caddyfile(public_ip)
     if public_ip:
         # 检查 docker-compose 是否已安装
         if is_docker_compose_installed():
@@ -346,6 +344,10 @@ if __name__ == "__main__":
             # 停止 /www/docker 目录下的容器
             stop_docker_compose_containers("/www/docker")
 
+        # 创建 /www/docker 目录
+        create_directories_and_set_permissions()
+        # 写入 Caddyfile
+        replace_ip_in_caddyfile(public_ip)
         # 获取系统信息
         os_info = get_os_distribution()
 
