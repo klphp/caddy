@@ -10,6 +10,12 @@ clear
 echo "+----------------------------------------------------------+"
 echo "|          Pureftpd for LNMP,  Written by Licess           |"
 echo "+----------------------------------------------------------+"
+echo "|This script is a tool to install pureftpd for LNMP        |"
+echo "+----------------------------------------------------------+"
+echo "|For more information please visit https://lnmp.org        |"
+echo "+----------------------------------------------------------+"
+echo "|Usage: ./pureftpd.sh                                      |"
+echo "+----------------------------------------------------------+"
 cur_dir=$(pwd)
 action=$1
 
