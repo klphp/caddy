@@ -1,9 +1,7 @@
-import shutil
 import subprocess
 import os
 import sys
-
-import requests
+import utils
 
 
 def run_command(command, shell=True, cwd=None):
@@ -14,7 +12,7 @@ def run_command(command, shell=True, cwd=None):
         print(f"命令执行失败：{command}")
         print(stderr.decode())
         sys.exit(1)  # 退出程序，返回错误码 1
-    print(stdout.decode()) # 添加这一行来打印输出
+    print(stdout.decode())  # 添加这一行来打印输出
     return stdout.decode()
 
 
@@ -29,12 +27,13 @@ def install_docker():
     if os.path.exists(source_file):
         try:
             # 复制文件（覆盖目标文件）
-            shutil.copy(source_file, destination_file)
-            print(f"文件已成功复制到 {destination_file}")
+            utils.copy_item(source_file, destination_file)
         except Exception as e:
             print(f"复制文件时出错: {e}")
+            exit(1)
     else:
         print(f"源文件 {source_file} 不存在，请检查路径。")
+        exit(1)
 
     # 安装 wget 和 sudo
     run_command("apt install wget -y")
@@ -52,7 +51,6 @@ def install_docker():
 
     # 安装 Docker
     run_command("apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin")
-
 
     # 设置 Docker 开机启动
     run_command("systemctl start docker")

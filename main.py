@@ -1,5 +1,4 @@
 import os
-import re
 import shutil
 import sys
 import getpass
@@ -100,8 +99,6 @@ def get_and_confirm_ip():
             print("请重新输入 IP 地址。")
         else:
             print("无效的输入，请重新确认。")
-
-
 
 
 def docker_compose_up():
@@ -219,16 +216,16 @@ def install_docker_compose():
 
 
 def replace_ip_in_caddyfile(ip):
+    source_file = "./Caddyfile"
     directory_to_clear = "/www/docker/caddy_config/"
     utils.clear_directory(directory_to_clear)
-    source_file = "./Caddyfile"
-    destination_file = "/www/docker/caddy_config/Caddyfile"
+    destination_file = directory_to_clear + source_file
     ip_address = ip
 
     # 检查源文件是否存在
     if not os.path.exists(source_file):
         print(f"错误：源文件 {source_file} 不存在。")
-        return
+        exit(1)
 
     try:
         # 读取源文件内容
@@ -245,6 +242,7 @@ def replace_ip_in_caddyfile(ip):
         print(f"已将 {source_file} 中的 [ip] 替换为 {ip_address}，并写入 {destination_file}。")
     except Exception as e:
         print(f"替换文件内容或写入文件时出错：{e}")
+
 
 def create_directories_and_set_permissions():
     """创建目录并设置权限"""
@@ -336,7 +334,7 @@ def docker_login(registry, username, password=None):
 
 if __name__ == "__main__":
     # 获取公网 IP
-    run_command(f"apt update -y")
+    # run_command(f"apt update -y")
     public_ip = get_and_confirm_ip()
     if public_ip:
         # 检查 docker-compose 是否已安装
@@ -349,6 +347,7 @@ if __name__ == "__main__":
         create_directories_and_set_permissions()
         # 写入 Caddyfile
         replace_ip_in_caddyfile(public_ip)
+
         # 获取系统信息
         os_info = get_os_distribution()
 
