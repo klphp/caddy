@@ -1,10 +1,10 @@
 version: '3'
 services:
-  # redis-yyuit:
+  # redis-:
   #   image: 'registry.cn-hangzhou.aliyuncs.com/hi121/redis:v1'
   #   restart: always
   #   volumes:
-  #     - './data/dbs/redis/yyuit:/data'
+  #     - './data/dbs/redis/default:/data'
   #   networks:
   #     - lnmp
   # mysql:

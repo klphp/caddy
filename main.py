@@ -221,7 +221,7 @@ def install_docker_compose():
 def replace_ip_in_caddyfile(ip):
     directory_to_clear = "/www/docker/caddy_config/"
     utils.clear_directory(directory_to_clear)
-    source_file = "Caddyfile"
+    source_file = "./Caddyfile"
     destination_file = "/www/docker/caddy_config/Caddyfile"
     ip_address = ip
 

@@ -1,3 +1,11 @@
+http://[ip] {
+	root * /var/www/html
+	# 开启压缩
+	encode zstd gzip
+	php_fastcgi php82:9000
+	file_server
+	try_files {path} {path}/ /index.php?{$query}
+}
 # 域名访问配置，phpmyadmin等
 #http://[ip]:80 {
 #    handle /__phpmyadmin/* {
@@ -9,6 +17,7 @@
 #        respond "Unauthorized access" 403
 #    }
 #}
+# 域名配置示例，https自动配置
 #www.baidu.com {
 #	root * /var/www/html/baidu
 #	encode zstd gzip
@@ -16,11 +25,3 @@
 #	try_files {path} {path}/ /index.php?{query}
 #	php_fastcgi php82:9000
 #}
-http://[ip] {
-	root * /var/www/html
-	# 开启压缩
-	encode zstd gzip
-	php_fastcgi php82:9000
-	file_server
-	try_files {path} {path}/ /index.php?{$query}
-}
