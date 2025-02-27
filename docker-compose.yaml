@@ -21,6 +21,22 @@ services:
   #     - '127.0.0.1:3306:3306'
   #   networks:
   #     - lnmp
+
+  ftp:
+    image: stilliard/pure-ftpd
+    container_name: pure-ftpd
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    volumes: # remember to replace /folder_on_disk/ with the path to where you want to store the files on the host machine
+      - "/www/docker:/home/username/"
+      - "/www/docker/data/ftp/passwd:/etc/pure-ftpd/passwd"
+    environment:
+      PUBLICHOST: "localhost"
+      FTP_USER_NAME: www
+      FTP_USER_PASS: 12345678
+      FTP_USER_HOME: /home/username
+    restart: always
   caddy:
     image: registry.cn-hangzhou.aliyuncs.com/hi121/caddy:v1
     restart: unless-stopped
