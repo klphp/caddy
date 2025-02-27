@@ -373,7 +373,7 @@ if __name__ == "__main__":
 
             print("Docker 登录成功，继续执行后续操作...")
             docker_compose_up()
-
+            run_command(f"chown -R www:www /www/docker")
             print("请手动以下命令：")
             print("newgrp docker")
             print("sudo systemctl restart docker")
