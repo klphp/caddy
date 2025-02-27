@@ -19,6 +19,9 @@ echo "+----------------------------------------------------------+"
 cur_dir=$(pwd)
 action=$1
 
+. include/main.sh
+. include/init.sh
+
 Get_Dist_Name
 
 Install_Pureftpd()
