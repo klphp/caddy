@@ -281,13 +281,12 @@ def copy_docker_compose_and_set_permissions():
     """复制 docker-compose.yaml 并设置权限"""
 
     # 源文件路径
-    source_file = "docker-compose.yaml"
+    source_file = os.path.join(utils.current_file_directory(), "docker-compose.yaml")
     # 目标文件路径
     destination_file = "/www/docker/docker-compose.yaml"
     utils.copy_item(source_file, destination_file, overwrite=True)
     # 设置文件权限
     run_command(f"chown www:www {destination_file}")
-
     print(f"文件 {destination_file} 权限设置完成。")
 
 
