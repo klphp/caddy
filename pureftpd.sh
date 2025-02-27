@@ -13,7 +13,6 @@ echo "+----------------------------------------------------------+"
 cur_dir=$(pwd)
 action=$1
 
-. lnmp.conf
 . include/main.sh
 . include/init.sh
 
