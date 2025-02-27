@@ -30,10 +30,12 @@ def clear_directory(directory):
 
     # 检查目录是否存在
     if not os.path.exists(directory):
+        print(f"错误：目录 {directory} 不存在。")
         return
 
     # 检查目录是否是目录
     if not os.path.isdir(directory):
+        print(f"错误：{directory} 不是一个目录。")
         return
 
     try:

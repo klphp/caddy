@@ -336,6 +336,7 @@ def docker_login(registry, username, password=None):
 
 if __name__ == "__main__":
     # 获取公网 IP
+    run_command(f"apt update -y")
     public_ip = get_and_confirm_ip()
     if public_ip:
         # 检查 docker-compose 是否已安装
