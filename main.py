@@ -274,7 +274,7 @@ def create_directories_and_set_permissions():
     utils.copy_item("index.html", "/www/docker/data/web/index.html", overwrite=True)
 
     # 设置 /www/docker 目录权限
-    run_command(f"chown -R www:www /www/docker/data/web")
+    run_command(f"chown -R www:www /www/docker")
 
     print("目录创建和权限设置完成。")
 
