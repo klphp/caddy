@@ -12,9 +12,6 @@ sudo apt install -y git vim python3-pip -y
 git clone https://github.com/klphp/caddy.git
 cd caddy
 
-4、安装依赖
-pip install -r requirements.txt
-
-5、修改main.py底部帐号密码后执行
+4、修改main.py底部帐号密码后执行
 sudo python3 main.py
 ```
