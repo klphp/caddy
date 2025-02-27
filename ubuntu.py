@@ -20,7 +20,7 @@ def install_docker():
     """安装 Docker"""
 
     # 定义源文件和目标文件路径
-    source_file = "daemon.json"
+    source_file = os.path.join(utils.current_file_directory(), 'daemon.json')
     destination_file = "/etc/docker/daemon.json"
 
     # 检查源文件是否存在

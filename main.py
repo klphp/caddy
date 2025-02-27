@@ -216,14 +216,12 @@ def install_docker_compose():
 
 
 def replace_ip_in_caddyfile(ip):
-    source_file = "./Caddyfile"
+    source_file = os.path.join(utils.current_file_directory(), 'Caddyfile')
     directory_to_clear = "/www/docker/caddy_config/"
     utils.clear_directory(directory_to_clear)
     destination_file = os.path.join(directory_to_clear, os.path.basename(source_file))
     ip_address = ip
 
-    print(f"destination_file：{destination_file}")
-    print(f"当前工作目录：{os.getcwd()}")
     # 检查源文件是否存在
     if not os.path.exists(source_file):
         print(f"错误：源文件 {source_file} 不存在。")

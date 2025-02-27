@@ -2,6 +2,12 @@ import os
 import shutil
 
 
+def current_file_directory():
+    """
+    获取当前脚本目录
+    """
+    return os.path.dirname(os.path.abspath(__file__))
+
 def copy_item(source, destination, overwrite=False):
     """
     复制文件或目录
