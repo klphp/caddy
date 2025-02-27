@@ -369,12 +369,13 @@ if __name__ == "__main__":
             username = "5735570@qq.com"
             registry = "registry.cn-hangzhou.aliyuncs.com"
             docker_login(registry, username)
-
             print("Docker 登录成功，继续执行后续操作...")
-            docker_compose_up()
+
+            print("正在执行目录权限配置...")
             run_command(f"chown -R www:www /www/docker")
-            run_command(f"chmod 755 /www/docker")
-            run_command(f"chmod 755 -R /www/docker/data/ftp")
+            run_command(f"chmod 755 -R /www/docker")
+            docker_compose_up()
+
             print("请手动以下命令：")
             print("newgrp docker")
             print("sudo systemctl restart docker")
