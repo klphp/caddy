@@ -33,7 +33,7 @@ services:
       - "/www/docker/data/ftp/passwd:/etc/pure-ftpd/passwd"
     environment:
       PUBLICHOST: "localhost"
-      FTP_USER_NAME: www
+      FTP_USER_NAME: root
       FTP_USER_PASS: 12345678
       FTP_USER_HOME: /home/username
     restart: always

@@ -213,6 +213,21 @@ def install_docker_compose():
         for chunk in response.iter_content(chunk_size=8192):
             f.write(chunk)
     run_command(f"chmod +x {output_path}")
+def install_docker_compose():
+    """安装 Docker Compose"""
+    version = "v2.26.1"
+    os_name = run_command("uname -s").strip()
+    arch = run_command("uname -m").strip()
+    url = f"https://github.com/docker/compose/releases/download/{version}/docker-compose-{os_name}-{arch}"
+    output_path = "/usr/local/bin/docker-compose"
+    response = requests.get(url, stream=True)
+    if response.status_code != 200:
+        print(f"下载 Docker Compose 失败：{response.status_code}")
+        sys.exit(1)  # 退出程序，返回错误码 1
+    with open(output_path, "wb") as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
+    run_command(f"chmod +x {output_path}")
 
 
 def replace_ip_in_caddyfile(ip):
@@ -269,7 +284,9 @@ def create_directories_and_set_permissions():
     run_command(f"chown www:www {web_dir_path}")
 
     utils.copy_item("config", "/www/docker/config", overwrite=False)
-    utils.copy_item("index.html", "/www/docker/data/web/index.html", overwrite=True)
+    utils.copy_item("./web/index.html", "/www/docker/data/web/index.html", overwrite=True)
+    utils.copy_item("./web/phpinfo.php", "/www/docker/data/web/phpinfo.php", overwrite=True)
+    utils.copy_item("./web/test.php", "/www/docker/data/web/test.php", overwrite=True)
 
     # 设置 /www/docker 目录权限
     run_command(f"chown -R www:www /www/docker")
