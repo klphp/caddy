@@ -36,6 +36,12 @@ sudo apt install -y git vim python3-pip python3-venv -y
 ```shell
 git clone https://github.com/klphp/caddy.git
 cd caddy
+
+# 重要事情说5遍
+# 修改 .env.example 中的帐号密码
+# 修改 .env.example 中的帐号密码
+# 修改 .env.example 中的帐号密码
+# 修改 .env.example 中的帐号密码
 # 修改 .env.example 中的帐号密码
 ```
 
@@ -76,14 +82,14 @@ Caddy 配置文件位于 `/www/docker/caddy_config/Caddyfile`，您可以根据�
 
    ```bash
    cd /www/docker
-   docker-compose restart
+   sudo docker-compose restart
    ```
 
 2. **如何查看日志？**
 
    ```bash
    cd /www/docker
-   docker-compose logs -f
+   sudo docker-compose logs -f
    ```
 
 3. **如何更新配置？**
@@ -92,8 +98,8 @@ Caddy 配置文件位于 `/www/docker/caddy_config/Caddyfile`，您可以根据�
 
    ```bash
    cd /www/docker
-   docker-compose down
-   docker-compose up -d
+   sudo docker-compose down
+   sudo docker-compose up -d
    ```
 
 ## 更新日志
