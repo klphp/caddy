@@ -37,6 +37,13 @@ services:
       FTP_USER_PASS: ${FTP_USER_PASS:-ftppassword}
       FTP_USER_HOME: /home/username
     restart: always
+    command: >
+      /bin/bash -c "
+        mkdir -p /etc/pure-ftpd/passwd &&
+        touch /etc/pure-ftpd/passwd/pureftpd.passwd &&
+        pure-pw mkdb &&
+        /run.sh
+      "
   caddy:
     image: registry.cn-hangzhou.aliyuncs.com/hi121/caddy:v1
     restart: unless-stopped
