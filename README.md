@@ -127,8 +127,6 @@ Caddy 配置文件位于 `/www/docker/caddy_config/Caddyfile`，您可以根据�
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/portainer_data:/data
-    networks:
-      - lnmp
 ```
 
 - 服务器配置
