@@ -204,6 +204,7 @@ def install_docker_compose():
     os_name = run_command("uname -s").strip()
     arch = run_command("uname -m").strip()
     url = f"https://github.com/docker/compose/releases/download/{version}/docker-compose-{os_name}-{arch}"
+    print(f"正在下载 {url}，请稍候...")
     output_path = "/usr/local/bin/docker-compose"
     response = requests.get(url, stream=True)
     if response.status_code != 200:
