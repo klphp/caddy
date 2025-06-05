@@ -30,21 +30,25 @@ def install_docker():
             utils.copy_item(source_file, destination_file)
         except Exception as e:
             print(f"复制文件时出错: {e}")
-            exit(1)
+            sys.exit(1)
     else:
         print(f"源文件 {source_file} 不存在，请检查路径。")
-        exit(1)
+        sys.exit(1)
 
     # 安装 wget 和 sudo
-    run_command("apt install wget -y")
+    run_command("apt install wget apt-transport-https ca-certificates curl gnupg lsb-release -y")
 
-    # 添加 Docker GPG 密钥
-    run_command("wget -qO- https://download.docker.com/linux/debian/gpg | apt-key add -")
-
-    # 添加 Docker APT 仓库
+    # 获取架构信息
+    arch = run_command("dpkg --print-architecture").strip()
+    
+    # 添加 Docker GPG 密钥 (使用新的推荐方式)
+    run_command("mkdir -p /etc/apt/keyrings")
+    run_command("curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg")
+    
+    # 添加 Docker APT 仓库 (使用新的推荐方式)
     release = run_command("lsb_release -cs").strip()
-    repo = f"deb [arch=amd64] https://download.docker.com/linux/debian {release} stable"
-    run_command(f"echo '{repo}' | tee /etc/apt/sources.list.d/docker.list")
+    repo = f"deb [arch={arch} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {release} stable"
+    run_command(f"echo '{repo}' | tee /etc/apt/sources.list.d/docker.list > /dev/null")
 
     # 更新软件包列表
     run_command("apt update -y")

@@ -31,10 +31,10 @@ def install_docker():
             print(f"文件已成功复制到 {destination_file}")
         except Exception as e:
             print(f"复制文件时出错: {e}")
-            exit(1)
+            sys.exit(1)
     else:
         print(f"源文件 {source_file} 不存在，请检查路径。")
-        exit(1)
+        sys.exit(1)
 
     # 更新和升级软件包
     run_command("apt update -y")

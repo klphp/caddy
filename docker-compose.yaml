@@ -1,40 +1,40 @@
 version: '3'
 services:
-  # redis-:
-  #   image: 'registry.cn-hangzhou.aliyuncs.com/hi121/redis:v1'
-  #   restart: always
-  #   volumes:
-  #     - './data/dbs/redis/default:/data'
-  #   networks:
-  #     - lnmp
-  # mysql:
-  #   image: mysql:5.7
-  #   container_name: mysql
-  #   restart: always
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: 你的mysql密码 # replace with your password
-  #   volumes:
-  #     - ./data/dbs/mysql:/var/lib/mysql # replace with your mysql data directory
-  #     - ./config/mysql/etc/my.cnf:/etc/my.cnf
-  #     - ./logs/mysql:/var/log/mysql
-  #   ports:
-  #     - '127.0.0.1:3306:3306'
-  #   networks:
-  #     - lnmp
+  redis:
+    image: 'registry.cn-hangzhou.aliyuncs.com/hi121/redis:v1'
+    restart: always
+    volumes:
+      - './data/dbs/redis/default:/data'
+    networks:
+      - lnmp
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-mysqlpassword} # 使用环境变量，默认值为mysqlpassword
+    volumes:
+      - ./data/dbs/mysql:/var/lib/mysql # replace with your mysql data directory
+      - ./config/mysql/etc/my.cnf:/etc/my.cnf
+      - ./logs/mysql:/var/log/mysql
+    ports:
+      - '127.0.0.1:3306:3306'
+    networks:
+      - lnmp
 
   ftp:
     image: stilliard/pure-ftpd
     container_name: pure-ftpd
     ports:
-      - "21:21"
-      - "30000-30009:30000-30009"
+      - '21:21'
+      - '30000-30009:30000-30009'
     volumes: # remember to replace /folder_on_disk/ with the path to where you want to store the files on the host machine
-      - "/www/docker:/home/username/"
-      - "/www/docker/data/ftp/passwd:/etc/pure-ftpd/passwd"
+      - '/www/docker:/home/username/'
+      - '/www/docker/data/ftp/passwd:/etc/pure-ftpd/passwd'
     environment:
-      PUBLICHOST: "localhost"
-      FTP_USER_NAME: root
-      FTP_USER_PASS: 12345678
+      PUBLICHOST: 'localhost'
+      FTP_USER_NAME: ${FTP_USER_NAME:-ftpuser}
+      FTP_USER_PASS: ${FTP_USER_PASS:-ftppassword}
       FTP_USER_HOME: /home/username
     restart: always
   caddy:
@@ -59,15 +59,6 @@ services:
       - ./logs:/var/logs
     networks:
       - lnmp
-  # php72:
-  #   image: registry.cn-hangzhou.aliyuncs.com/hi121/php72:v3
-  #   restart: always
-  #   user: root
-  #   volumes:
-  #     - web_data:/var/www/html
-  #     - ./logs:/var/logs
-  #   networks:
-  #     - lnmp
 networks:
   lnmp:
 volumes:

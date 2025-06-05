@@ -213,21 +213,6 @@ def install_docker_compose():
         for chunk in response.iter_content(chunk_size=8192):
             f.write(chunk)
     run_command(f"chmod +x {output_path}")
-def install_docker_compose():
-    """安装 Docker Compose"""
-    version = "v2.26.1"
-    os_name = run_command("uname -s").strip()
-    arch = run_command("uname -m").strip()
-    url = f"https://github.com/docker/compose/releases/download/{version}/docker-compose-{os_name}-{arch}"
-    output_path = "/usr/local/bin/docker-compose"
-    response = requests.get(url, stream=True)
-    if response.status_code != 200:
-        print(f"下载 Docker Compose 失败：{response.status_code}")
-        sys.exit(1)  # 退出程序，返回错误码 1
-    with open(output_path, "wb") as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            f.write(chunk)
-    run_command(f"chmod +x {output_path}")
 
 
 def replace_ip_in_caddyfile(ip):
@@ -240,7 +225,7 @@ def replace_ip_in_caddyfile(ip):
     # 检查源文件是否存在
     if not os.path.exists(source_file):
         print(f"错误：源文件 {source_file} 不存在。")
-        exit(1)
+        sys.exit(1)  # 使用sys.exit替代exit
 
     try:
         # 读取源文件内容
@@ -257,6 +242,45 @@ def replace_ip_in_caddyfile(ip):
         print(f"已将 {source_file} 中的 [ip] 替换为 {ip_address}，并写入 {destination_file}。")
     except Exception as e:
         print(f"替换文件内容或写入文件时出错：{e}")
+        sys.exit(1)  # 使用sys.exit替代exit
+
+
+def create_env_file():
+    """创建.env文件，用于存储环境变量"""
+    source_file = os.path.join(utils.current_file_directory(), '.env.example')
+    destination_file = "/www/docker/.env"
+    
+    # 检查源文件是否存在
+    if not os.path.exists(source_file):
+        print(f"警告：.env.example 文件不存在，将创建默认的 .env 文件。")
+        # 创建默认的 .env 文件内容
+        env_content = """# Docker LNMP环境变量配置
+
+# MySQL配置
+MYSQL_ROOT_PASSWORD=mysqlpassword
+
+# FTP配置
+FTP_USER_NAME=ftpuser
+FTP_USER_PASS=ftppassword
+"""
+        with open(destination_file, "w") as f:
+            f.write(env_content)
+    else:
+        # 如果目标文件已存在，询问用户是否覆盖
+        if os.path.exists(destination_file):
+            overwrite = input(f"{destination_file} 已存在，是否覆盖？(y/n): ")
+            if overwrite.lower() != 'y':
+                print(f"保留现有的 {destination_file} 文件。")
+                return
+        
+        # 复制文件
+        utils.copy_item(source_file, destination_file, overwrite=True)
+    
+    print(f".env 文件已创建在 {destination_file}，请根据需要修改其中的配置。")
+    
+    # 设置文件权限
+    run_command(f"chown www:www {destination_file}")
+    run_command(f"chmod 600 {destination_file}")
 
 
 def create_directories_and_set_permissions():
@@ -307,13 +331,17 @@ def copy_docker_compose_and_set_permissions():
     print(f"文件 {destination_file} 权限设置完成。")
 
 
-def docker_login(registry, username, password=None):
+def docker_login(registry, username=None, password=None):
     """
     登录 Docker 私有仓库
     :param registry: 仓库地址（如 registry.cn-hangzhou.aliyuncs.com）
-    :param username: 用户名
+    :param username: 用户名（如果未提供，则提示用户输入）
     :param password: 密码（如果未提供，则提示用户输入）
     """
+    # 如果未提供用户名，提示用户输入
+    if username is None:
+        username = input("请输入 Docker 仓库用户名: ")
+        
     # 如果未提供密码，提示用户输入
     if password is None:
         password = getpass.getpass("请输入 Docker 仓库密码: ")
@@ -363,6 +391,8 @@ if __name__ == "__main__":
         create_directories_and_set_permissions()
         # 写入 Caddyfile
         replace_ip_in_caddyfile(public_ip)
+        # 创建环境变量文件
+        create_env_file()
 
         # 获取系统信息
         os_info = get_os_distribution()
@@ -383,9 +413,8 @@ if __name__ == "__main__":
             install_docker_compose()
             copy_docker_compose_and_set_permissions()
 
-            username = "5735570@qq.com"
             registry = "registry.cn-hangzhou.aliyuncs.com"
-            docker_login(registry, username)
+            docker_login(registry)
             print("Docker 登录成功，继续执行后续操作...")
 
             print("正在执行目录权限配置...")
