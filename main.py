@@ -204,6 +204,12 @@ def install_docker_compose():
     os_name = run_command("uname -s").strip()
     arch = run_command("uname -m").strip()
     url = f"https://github.com/docker/compose/releases/download/{version}/docker-compose-{os_name}-{arch}"
+    # 判断是否已下载，若没已经下载跳过后续任务
+    if os.path.exists("/usr/local/bin/docker-compose"):
+        print(f"已下载 {url}，跳过任务...")
+        return
+
+    # 下载
     print(f"正在下载 {url}，请稍候...")
     output_path = "/usr/local/bin/docker-compose"
     response = requests.get(url, stream=True)
