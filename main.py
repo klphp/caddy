@@ -536,7 +536,7 @@ if __name__ == "__main__":
             print("Docker 登录成功，继续执行后续操作...")
 
             print("正在执行目录权限配置...")
-            run_command(f"chown -R www:www /www/docker")
+            run_command(f"chown -R 101000:101000 /www/docker")
             run_command(f"chmod 755 -R /www/docker")
             
             # 配置docker userns-remap

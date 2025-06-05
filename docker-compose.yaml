@@ -2,7 +2,6 @@ version: '3'
 services:
   redis:
     image: 'registry.cn-hangzhou.aliyuncs.com/hi121/redis:v1'
-    user: 'www:www' # 使用统一的www用户
     restart: always
     volumes:
       - './data/dbs/redis/default:/data'
@@ -10,7 +9,6 @@ services:
       - lnmp
   mysql:
     image: mysql:5.7
-    user: 'www:www' # 使用统一的www用户
     container_name: mysql
     restart: always
     environment:
@@ -23,33 +21,26 @@ services:
       - '127.0.0.1:3306:3306'
     networks:
       - lnmp
-
   ftp:
     image: stilliard/pure-ftpd
     container_name: pure-ftpd
-    user: 'www:www' # 使用统一的www用户
     ports:
       - '21:21'
       - '30000-30009:30000-30009'
     volumes: # remember to replace /folder_on_disk/ with the path to where you want to store the files on the host machine
       - '/www/docker:/home/username/'
       - '/www/docker/data/ftp/passwd:/etc/pure-ftpd/passwd'
+    # 注意一定要将command中的localhost改为你的公网ip
+    command: '/run.sh -l puredb:/etc/pure-ftpd/pureftpd.pdb -E -j -P localhost -p 30000:30009 -c 5 -C 5'
     environment:
-      PUBLICHOST: 'localhost'
       FTP_USER_NAME: ${FTP_USER_NAME:-ftpuser}
       FTP_USER_PASS: ${FTP_USER_PASS:-ftppassword}
       FTP_USER_HOME: /home/username
     restart: always
-    command: >
-      /bin/bash -c "
-        mkdir -p /etc/pure-ftpd/passwd &&
-        touch /etc/pure-ftpd/passwd/pureftpd.passwd &&
-        pure-pw mkdb &&
-        /run.sh
-      "
+    networks:
+      - lnmp
   caddy:
     image: registry.cn-hangzhou.aliyuncs.com/hi121/caddy:v1
-    user: 'www:www' # 使用统一的www用户
     restart: unless-stopped
     ports:
       - '80:80'
@@ -65,18 +56,11 @@ services:
   php82:
     image: registry.cn-hangzhou.aliyuncs.com/hi121/php82:v6
     restart: always
-    user: 'www:www' # 使用统一的www用户
     volumes:
       - web_data:/var/www/html
       - ./logs:/var/logs
     networks:
       - lnmp
-    command: >
-      /bin/sh -c "
-        chown -R www:www /var/www/html &&
-        chmod -R 755 /var/www/html &&
-        php-fpm
-      "
 networks:
   lnmp:
 volumes:
