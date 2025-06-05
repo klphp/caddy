@@ -319,6 +319,9 @@ FTP_USER_PASS=ftppassword
 
 def create_directories_and_set_permissions():
     """创建目录并设置权限"""
+    
+    # 确保www用户和组存在
+    add_www_user_and_group()
 
     # 获取当前用户名和用户组名
     current_user = getpass.getuser()
@@ -452,8 +455,8 @@ if __name__ == "__main__":
         os_info = get_os_distribution()
 
         if os_info:
-            add_user_to_docker_group()
             add_www_user_and_group()
+            add_user_to_docker_group()
             if os_info.get('ID') == 'ubuntu':
                 print("Ubuntu  Docker脚本安装中......")
                 ubuntu.install_docker()

@@ -1,4 +1,3 @@
-version: '3'
 services:
   redis:
     image: 'registry.cn-hangzhou.aliyuncs.com/hi121/redis:v1'
