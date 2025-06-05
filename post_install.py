@@ -13,6 +13,14 @@ def run_command(command):
         sys.exit(1)
     print(stdout.decode())
 
+def check_in_group(group):
+    """检查当前用户是否在指定组"""
+    try:
+        output = subprocess.check_output(["groups"], universal_newlines=True)
+        return group in output.split()
+    except subprocess.CalledProcessError:
+        return False
+
 def check_docker_compose_file():
     """检查docker-compose文件是否存在"""
     compose_file = "/www/docker/docker-compose.yaml"
@@ -29,15 +37,31 @@ def main():
     # 2. 更新用户组
     print("正在更新用户组...")
     try:
-        # 使用sg命令替代newgrp，避免启动新shell
-        run_command("sg docker -c 'echo 成功加入docker组'")
-        # 验证用户组更新
-        run_command("groups | grep docker")
-        print("用户组更新成功")
+        # 使用sg命令更新组
+        run_command("sg docker -c 'echo 尝试加入docker组'")
+        
+        # 使用新方法验证组更新
+        if check_in_group("docker"):
+            print("成功加入docker组")
+        else:
+            print("警告：初次验证失败，尝试直接添加用户到组...")
+            run_command("sudo usermod -aG docker $USER")
+            
+            # 添加重试机制
+            for _ in range(3):
+                if check_in_group("docker"):
+                    print("成功加入docker组")
+                    break
+                time.sleep(1)
+            else:
+                print("错误：无法验证用户组更新，请手动执行：")
+                print("sudo usermod -aG docker $USER && newgrp docker")
+                sys.exit(1)
+                
     except SystemExit:
-        print("警告：用户组更新失败，尝试直接添加用户到组")
+        print("警告：用户组更新过程出错，使用备用方案")
         run_command("sudo usermod -aG docker $USER")
-        run_command("newgrp docker || true")  # 作为后备方案
+        run_command("newgrp docker || true")
     time.sleep(3)  # 等待Docker完全重启
     
     # 3. 重启docker服务
