@@ -44,6 +44,7 @@ def main():
     
     # 2. 重启docker服务
     print("正在重启docker服务...")
+    run_command("sudo systemctl daemon-reload")
     run_command("sudo systemctl restart docker")
     time.sleep(3)  # 等待Docker完全重启
         

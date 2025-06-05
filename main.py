@@ -227,41 +227,19 @@ def add_www_user_and_group():
     else:
         print(f"用户 {username} 已存在，跳过创建。")
 
-    # 检查/etc/subuid文件中是否有www:100000:65536，没有则添加进去
-    if not check_subuid_subgid_exists(username, 100000, 65536):
-        run_command(f"echo '{username}:100000:65536' >> /etc/subuid")
-        print(f"已将 {username} 添加到 /etc/subuid。")
-    else:
-        print(f"/etc/subuid 已存在 {username}，跳过添加。")
-    
-def check_subuid_subgid_exists(username, start_id, range_size):
-        """
-        检查 /etc/subuid 和 /etc/subgid 文件中是否存在指定的用户名和范围
-        """
-        subuid_exists = False
-        subgid_exists = False
-        subuid_line = f"{username}:{start_id}:{range_size}"
-        subgid_line = f"{username}:{start_id}:{range_size}"
-    
-        try:
-            if os.path.exists("/etc/subuid"):
-                with open("/etc/subuid", "r") as f:
-                    for line in f:
-                        if line.strip() == subuid_line:
-                            subuid_exists = True
-                            break
-            if os.path.exists("/etc/subgid"):
-                with open("/etc/subgid", "r") as f:
-                    for line in f:
-                        if line.strip() == subgid_line:
-                            subgid_exists = True
-                            break
-        except Exception as e:
-            print(f"检查 /etc/subuid 或 /etc/subgid 时出错: {e}")
-            return False
-    
-        return subuid_exists and subgid_exists
-
+    # 检查/etc/subuid文件和/etc/subgid是否有www:100000:65536，没有则添加进去
+    if not os.path.exists("/etc/subuid"):
+        run_command("touch /etc/subuid")
+        print(f"已创建 /etc/subuid 文件。")
+    if not os.path.exists("/etc/subgid"):
+        run_command("touch /etc/subgid")
+        print(f"已创建 /etc/subgid 文件。")
+    if "www:100000:65536" not in run_command("cat /etc/subuid"):
+        run_command("echo 'www:100000:65536' >> /etc/subuid")
+        print(f"已添加 www:100000:65536 到 /etc/subuid 文件。")
+    if "www:100000:65536" not in run_command("cat /etc/subgid"):
+        run_command("echo 'www:100000:65536' >> /etc/subgid")
+        print(f"已添加 www:100000:65536 到 /etc/subgid 文件。")
 
 
 def install_docker_compose():
@@ -501,7 +479,6 @@ if __name__ == "__main__":
         os_info = get_os_distribution()
 
         if os_info:
-            add_www_user_and_group()
             add_user_to_docker_group()
             if os_info.get('ID') == 'ubuntu':
                 print("Ubuntu  Docker脚本安装中......")
@@ -512,7 +489,7 @@ if __name__ == "__main__":
             else:
                 print(f"当前系统是 {os_info.get('ID')}")
                 sys.exit(1)  # 退出程序，返回错误码 1
-
+            add_www_user_and_group()
             # 检查内核版本是否需要更新
             current_kernel = run_command("uname -r").strip()
             print(f"当前内核版本: {current_kernel}")
