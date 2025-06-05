@@ -28,7 +28,16 @@ def main():
 
     # 2. 更新用户组
     print("正在更新用户组...")
-    run_command("sudo newgrp docker")
+    try:
+        # 使用sg命令替代newgrp，避免启动新shell
+        run_command("sg docker -c 'echo 成功加入docker组'")
+        # 验证用户组更新
+        run_command("groups | grep docker")
+        print("用户组更新成功")
+    except SystemExit:
+        print("警告：用户组更新失败，尝试直接添加用户到组")
+        run_command("sudo usermod -aG docker $USER")
+        run_command("newgrp docker || true")  # 作为后备方案
     time.sleep(3)  # 等待Docker完全重启
     
     # 3. 重启docker服务
