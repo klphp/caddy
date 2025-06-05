@@ -313,6 +313,12 @@ def create_directories_and_set_permissions():
     web_dir_path = os.path.join("/www/docker/data", "web")
     os.makedirs(web_dir_path, exist_ok=True)
     run_command(f"chown www:www {web_dir_path}")
+    
+    # 创建 FTP 相关目录
+    ftp_passwd_dir = os.path.join("/www/docker/data/ftp", "passwd")
+    os.makedirs(ftp_passwd_dir, exist_ok=True)
+    run_command(f"chown -R www:www {ftp_passwd_dir}")
+    run_command(f"chmod -R 755 {ftp_passwd_dir}")
 
     utils.copy_item("config", "/www/docker/config", overwrite=False)
     utils.copy_item("./web/index.html", "/www/docker/data/web/index.html", overwrite=True)
