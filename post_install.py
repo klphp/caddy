@@ -25,26 +25,31 @@ def main():
     
     # 1. 检查必要文件
     check_docker_compose_file()
-    
-    # 2. 重启docker服务
-    print("正在重启docker服务...")
-    run_command("sudo systemctl restart docker")
-    time.sleep(3)  # 等待Docker完全重启
-    
+
     # 验证www用户存在
     print("验证系统用户配置...")
     run_command("id -u www")  # 如果用户不存在会抛出异常
-    
     # 检查userns配置是否生效
     result = subprocess.run("docker info --format '{{.SecurityOptions}}'",
                           shell=True, capture_output=True, text=True)
     if "userns" not in result.stdout:
         print("错误：用户命名空间未正确配置！")
         sys.exit(1)
-    
-    # 3. 更新用户组
+
+
+    # 2. 更新用户组
     print("正在更新用户组...")
     run_command("sudo newgrp docker")
+    run_command("sudo usermod -aG docker www")
+    
+    # 2. 重启docker服务
+    print("正在重启docker服务...")
+    run_command("sudo systemctl restart docker")
+    time.sleep(3)  # 等待Docker完全重启
+        
+    # 3. 验证用户组更新
+    print("验证用户组配置...")
+    run_command("groups www")
     
     # 4. 停止现有容器
     print("正在停止现有容器...")
