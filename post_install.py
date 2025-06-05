@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import os
+import time
 
 def run_command(command):
     """运行命令并检查结果"""
@@ -28,6 +29,18 @@ def main():
     # 2. 重启docker服务
     print("正在重启docker服务...")
     run_command("sudo systemctl restart docker")
+    time.sleep(3)  # 等待Docker完全重启
+    
+    # 验证www用户存在
+    print("验证系统用户配置...")
+    run_command("id -u www")  # 如果用户不存在会抛出异常
+    
+    # 检查userns配置是否生效
+    result = subprocess.run("docker info --format '{{.SecurityOptions}}'",
+                          shell=True, capture_output=True, text=True)
+    if "userns" not in result.stdout:
+        print("错误：用户命名空间未正确配置！")
+        sys.exit(1)
     
     # 3. 更新用户组
     print("正在更新用户组...")

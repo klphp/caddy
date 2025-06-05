@@ -189,9 +189,11 @@ def get_www_uid_gid():
         return None, None
 
 def configure_docker_userns(uid, gid):
-    """配置docker的userns-remap"""
+    """配置docker的userns-remap
+    格式说明: "UID:GID" (前面是用户ID，后面是组ID)
+    """
     daemon_config = {
-        "userns-remap": f"{uid}:{gid}"
+        "userns-remap": f"{uid}:{gid}"  # 格式: "用户ID:组ID"
     }
     
     # 确保/etc/docker目录存在
@@ -484,7 +486,7 @@ if __name__ == "__main__":
                 configure_docker_userns(uid, gid)
             
             print("安装完成！请运行以下命令启动服务：")
-            print("python post_install.py")
+            print("sudo python3 post_install.py")
         else:
             print("无法获取系统信息")
             sys.exit(1)  # 退出程序，返回错误码 1
