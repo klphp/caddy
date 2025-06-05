@@ -177,6 +177,32 @@ def add_user_to_docker_group():
     run_command(f"usermod -aG docker {username}")
     print(f"用户 {username} 已添加到 {group_name} 组。")
 
+def get_www_uid_gid():
+    """获取www用户的UID和GID"""
+    try:
+        uid = run_command("id -u www").strip()
+        gid = run_command("id -g www").strip()
+        return uid, gid
+    except SystemExit:
+        print("获取www用户UID/GID失败")
+        return None, None
+
+def configure_docker_userns(uid, gid):
+    """配置docker的userns-remap"""
+    daemon_config = {
+        "userns-remap": f"{uid}:{gid}"
+    }
+    
+    # 确保/etc/docker目录存在
+    run_command("mkdir -p /etc/docker")
+    
+    # 写入daemon.json
+    config_path = "/etc/docker/daemon.json"
+    with open(config_path, 'w') as f:
+        json.dump(daemon_config, f, indent=2)
+    
+    print(f"已配置 {config_path} 使用UID:{uid} GID:{gid}")
+
 
 def add_www_user_and_group():
     """添加 www 用户和用户组"""
@@ -447,12 +473,14 @@ if __name__ == "__main__":
             print("正在执行目录权限配置...")
             run_command(f"chown -R www:www /www/docker")
             run_command(f"chmod 755 -R /www/docker")
-            docker_compose_up()
-
-            print("请手动以下命令：")
-            print("newgrp docker")
-            print("sudo systemctl restart docker")
-            print("出于安全考虑，全部安装完成后建议删除本程序的安装目录")
+            
+            # 配置docker userns-remap
+            uid, gid = get_www_uid_gid()
+            if uid and gid:
+                configure_docker_userns(uid, gid)
+            
+            print("安装完成！请运行以下命令启动服务：")
+            print("python post_install.py")
         else:
             print("无法获取系统信息")
             sys.exit(1)  # 退出程序，返回错误码 1

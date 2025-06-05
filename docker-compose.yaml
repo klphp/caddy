@@ -2,6 +2,7 @@ version: '3'
 services:
   redis:
     image: 'registry.cn-hangzhou.aliyuncs.com/hi121/redis:v1'
+    user: 'www:www' # 使用统一的www用户
     restart: always
     volumes:
       - './data/dbs/redis/default:/data'
@@ -9,6 +10,7 @@ services:
       - lnmp
   mysql:
     image: mysql:5.7
+    user: 'www:www' # 使用统一的www用户
     container_name: mysql
     restart: always
     environment:
@@ -25,6 +27,7 @@ services:
   ftp:
     image: stilliard/pure-ftpd
     container_name: pure-ftpd
+    user: 'www:www' # 使用统一的www用户
     ports:
       - '21:21'
       - '30000-30009:30000-30009'
@@ -46,6 +49,7 @@ services:
       "
   caddy:
     image: registry.cn-hangzhou.aliyuncs.com/hi121/caddy:v1
+    user: 'www:www' # 使用统一的www用户
     restart: unless-stopped
     ports:
       - '80:80'
@@ -61,7 +65,7 @@ services:
   php82:
     image: registry.cn-hangzhou.aliyuncs.com/hi121/php82:v6
     restart: always
-    user: '100000:231072' # 匹配userns-remap映射的用户ID
+    user: 'www:www' # 使用统一的www用户
     volumes:
       - web_data:/var/www/html
       - ./logs:/var/logs
@@ -69,7 +73,7 @@ services:
       - lnmp
     command: >
       /bin/sh -c "
-        chown -R 100000:231072 /var/www/html &&
+        chown -R www:www /var/www/html &&
         chmod -R 755 /var/www/html &&
         php-fpm
       "
