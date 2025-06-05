@@ -267,6 +267,15 @@ def install_docker_compose():
 
 
 def replace_ip_in_caddyfile(ip):
+    # 替换docker-compose.yaml中的localhost为公网Ip
+    source_file = os.path.join(utils.current_file_directory(), 'docker-compose.yaml')
+    with open(source_file, 'r') as f:
+        content = f.read()
+    new_content = content.replace('localhost', ip)
+    with open(source_file, 'w') as f:
+        f.write(new_content)
+
+    # 替换Caddyfile中的[ip]
     source_file = os.path.join(utils.current_file_directory(), 'Caddyfile')
     directory_to_clear = "/www/docker/caddy_config/"
     utils.clear_directory(directory_to_clear)
