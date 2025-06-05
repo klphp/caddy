@@ -440,6 +440,13 @@ if __name__ == "__main__":
     run_command(f"apt update -y")
     public_ip = get_and_confirm_ip()
     if public_ip:
+        # 检查 docker 是否已安装
+        try:
+            run_command("docker --version")
+            print("Docker 已安装。")
+        except SystemExit:
+            print("Docker 未安装，将在系统检测后自动安装")
+            
         # 检查 docker-compose 是否已安装
         if is_docker_compose_installed():
             print("docker-compose 已安装。")
