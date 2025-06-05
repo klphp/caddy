@@ -1,4 +1,5 @@
 import os
+import time
 import json
 import shutil
 import sys
@@ -486,13 +487,33 @@ if __name__ == "__main__":
                 print("sudo reboot")
 
             # 确保Docker服务已启动
-            try:
-                run_command("systemctl start docker")
-                print("Docker服务已启动")
-            except SystemExit:
-                print("Docker服务启动失败，请检查日志:")
-                print("journalctl -xeu docker.service")
-                print("可能需要先重启系统")
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    # 检查并修复常见问题
+                    run_command("systemctl daemon-reload")
+                    run_command("systemctl reset-failed docker.service")
+                    
+                    # 尝试启动服务
+                    run_command("systemctl start docker")
+                    print("Docker服务已启动")
+                    break
+                except SystemExit:
+                    if attempt == max_retries - 1:
+                        print("\nDocker服务启动失败，诊断信息:")
+                        print("1. 检查服务状态:")
+                        run_command("systemctl status docker.service", check=False)
+                        print("\n2. 检查依赖服务:")
+                        run_command("systemctl list-dependencies docker.service", check=False)
+                        print("\n3. 常见解决方案:")
+                        print(" - 重启Docker socket: sudo systemctl restart docker.socket")
+                        print(" - 检查存储驱动: sudo docker info | grep Storage")
+                        print(" - 完全卸载后重装Docker")
+                        print(" - 查看详细日志: journalctl -xeu docker.service")
+                        print("\n可能需要重启系统后重试")
+                    else:
+                        print(f"启动失败，重试中 ({attempt + 1}/{max_retries})")
+                        time.sleep(2)
 
             install_docker_compose()
             copy_docker_compose_and_set_permissions()
