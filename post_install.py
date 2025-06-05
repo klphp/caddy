@@ -29,6 +29,7 @@ def main():
     # 2. 更新用户组
     print("正在更新用户组...")
     run_command("sudo newgrp docker")
+    time.sleep(3)  # 等待Docker完全重启
     
     # 3. 重启docker服务
     print("正在重启docker服务...")
