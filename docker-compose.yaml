@@ -61,11 +61,18 @@ services:
   php82:
     image: registry.cn-hangzhou.aliyuncs.com/hi121/php82:v6
     restart: always
+    user: '100000:231072' # 匹配userns-remap映射的用户ID
     volumes:
       - web_data:/var/www/html
       - ./logs:/var/logs
     networks:
       - lnmp
+    command: >
+      /bin/sh -c "
+        chown -R 100000:231072 /var/www/html &&
+        chmod -R 755 /var/www/html &&
+        php-fpm
+      "
 networks:
   lnmp:
 volumes:

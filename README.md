@@ -2,7 +2,7 @@
 
 ## 项目介绍
 
-这是一个用于快速部署 LNMP (Linux + Nginx/Caddy + MySQL + PHP) 环境的 Docker 安装包。该安装包支持 Ubuntu 和 Debian 系统，并包含以下组件：
+这是一个用于快速部署 LNMP (Linux + Caddy + MySQL + PHP) 环境的 Docker 安装包。该安装包支持 Ubuntu 和 Debian 系统，并包含以下组件：
 
 - Caddy (Web 服务器)
 - PHP 8.2
@@ -36,6 +36,7 @@ sudo apt install -y git vim python3-pip python3-venv -y
 ```shell
 git clone https://github.com/klphp/caddy.git
 cd caddy
+# 修改 .env.example 中的帐号密码
 ```
 
 4. 执行安装脚本
