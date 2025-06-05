@@ -308,7 +308,21 @@ def create_directories_and_set_permissions():
         path = os.path.join("/www/docker", sub_directory)
         os.makedirs(path, exist_ok=True)
         run_command(f"chown {current_user}:{current_group} {path}")
-
+    
+    # 创建MySQL配置目录
+    mysql_config_dir = "/www/docker/config/mysql/etc"
+    os.makedirs(mysql_config_dir, exist_ok=True)
+    
+    # 确保MySQL配置文件存在并且是文件而不是目录
+    mysql_config_file = os.path.join(mysql_config_dir, "my.cnf")
+    if os.path.isdir(mysql_config_file):
+        shutil.rmtree(mysql_config_file)
+    
+    # 复制MySQL配置文件
+    source_mysql_config = os.path.join(utils.current_file_directory(), "config/mysql/etc/my.cnf")
+    if os.path.exists(source_mysql_config):
+        utils.copy_item(source_mysql_config, mysql_config_file, overwrite=True)
+    
     # 在 data 目录下创建 web 目录并设置权限
     web_dir_path = os.path.join("/www/docker/data", "web")
     os.makedirs(web_dir_path, exist_ok=True)
