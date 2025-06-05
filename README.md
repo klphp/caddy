@@ -1,4 +1,4 @@
-# Docker LNMP 环境安装包
+# Docker LCMP 环境安装包
 
 ## 项目介绍
 
