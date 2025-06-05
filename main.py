@@ -476,6 +476,24 @@ if __name__ == "__main__":
                 print(f"当前系统是 {os_info.get('ID')}")
                 sys.exit(1)  # 退出程序，返回错误码 1
 
+            # 检查内核版本是否需要更新
+            current_kernel = run_command("uname -r").strip()
+            print(f"当前内核版本: {current_kernel}")
+            if "6.8.0-54" in current_kernel:
+                print("警告: 内核版本需要更新到6.8.0-60")
+                print("请执行以下命令更新并重启系统:")
+                print("sudo apt install linux-image-generic")
+                print("sudo reboot")
+
+            # 确保Docker服务已启动
+            try:
+                run_command("systemctl start docker")
+                print("Docker服务已启动")
+            except SystemExit:
+                print("Docker服务启动失败，请检查日志:")
+                print("journalctl -xeu docker.service")
+                print("可能需要先重启系统")
+
             install_docker_compose()
             copy_docker_compose_and_set_permissions()
 
