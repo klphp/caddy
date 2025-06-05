@@ -27,10 +27,9 @@ services:
     ports:
       - '21:21'
       - '30000-30009:30000-30009'
-    volumes: # remember to replace /folder_on_disk/ with the path to where you want to store the files on the host machine
+    volumes:
       - '/www/docker:/home/username/'
       - '/www/docker/data/ftp/passwd:/etc/pure-ftpd/passwd'
-    # 注意一定要将command中的localhost改为你的公网ip
     command: '/run.sh -l puredb:/etc/pure-ftpd/pureftpd.pdb -E -j -P localhost -p 30000:30009 -c 5 -C 5'
     environment:
       FTP_USER_NAME: ${FTP_USER_NAME:-ftpuser}
