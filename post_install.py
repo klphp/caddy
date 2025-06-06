@@ -69,19 +69,12 @@ def main():
     run_command("sudo systemctl daemon-reload")
     run_command("sudo systemctl restart docker")
     time.sleep(3)  # 等待Docker完全重启
-      
-    # 4. 停止现有容器
-    print("正在停止现有容器...")
-    run_command("docker-compose -f /www/docker/docker-compose.yaml down")
     
-    # 5. 启动容器
+    # 4. 启动容器
     print("正在启动容器服务...")
-    run_command("docker-compose -f /www/docker/docker-compose.yaml up -d")
+    run_command("cd /www/docker && docker-compose up -d && docker-compose ps")
     
-    print("\n安装后配置完成！")
-    print("请检查服务状态：")
-    print("docker-compose -f /www/docker/docker-compose.yaml ps")
-    print("\n建议删除安装目录以增强安全性")
+    print("\n安装完成,建议删除安装目录以增强安全性")
 
 if __name__ == "__main__":
     main()
