@@ -27,8 +27,8 @@ def run_command(command, shell=True, cwd=None):
             text=True # Python 3.7+ 推荐，用于自动解码输出为字符串
         )
         print(f"命令执行成功：{command}")
-        # 如果你不需要捕获输出，直接继承是最方便的
-        return "" # 不返回具体输出，因为它已经打印到控制台了
+        # 返回输出结果
+        return process.stdout
     except subprocess.CalledProcessError as e:
         print(f"命令执行失败：{command}")
         print(f"错误码：{e.returncode}")
