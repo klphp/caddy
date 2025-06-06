@@ -4,16 +4,37 @@ import os
 import time
 
 def run_command(command, shell=True, cwd=None):
-    """运行 shell 命令并返回输出，如果失败则退出程序"""
+    """
+    运行 shell 命令并显示实时输出，如果失败则退出程序。
+    """
     print('COMMAND>>>>>>>', command)
-    process = subprocess.Popen(command, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
-    stdout, stderr = process.communicate()
-    if process.returncode != 0:
+    try:
+        # 使用 check_call 或 run，并设置 stdout/stderr 为 None 或 sys.stdout/sys.stderr
+        # 这样子进程的输出就会直接流向当前 Python 脚本的输出
+        process = subprocess.run(
+            command,
+            shell=shell,
+            check=True, # 如果返回码非零，则会抛出 CalledProcessError 异常
+            cwd=cwd,
+            # stdout=None, # 默认就是 None，会将输出打印到控制台
+            # stderr=None, # 默认就是 None，会将错误打印到控制台
+            text=True # Python 3.7+ 推荐，用于自动解码输出为字符串
+        )
+        print(f"命令执行成功：{command}")
+        # 如果你不需要捕获输出，直接继承是最方便的
+        return "" # 不返回具体输出，因为它已经打印到控制台了
+    except subprocess.CalledProcessError as e:
         print(f"命令执行失败：{command}")
-        print(stderr.decode())
-        sys.exit(1)  # 退出程序，返回错误码 1
-    print(stdout.decode())  # 添加这一行来打印输出
-    return stdout.decode()
+        print(f"错误码：{e.returncode}")
+        # subprocess.run 默认会把 stderr 打印出来，所以这里不用重复打印 e.stderr
+        sys.exit(1)
+    except FileNotFoundError:
+        print(f"错误：命令未找到或路径不正确：{command}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"执行命令时发生未知错误：{command}", file=sys.stderr)
+        print(f"错误信息：{e}", file=sys.stderr)
+        sys.exit(1)
 
 def check_in_group(group):
     """检查当前用户是否在指定组"""
