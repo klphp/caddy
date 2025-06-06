@@ -3,15 +3,17 @@ import sys
 import os
 import time
 
-def run_command(command):
-    """运行命令并检查结果"""
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def run_command(command, shell=True, cwd=None):
+    """运行 shell 命令并返回输出，如果失败则退出程序"""
+    print('COMMAND>>>>>>>', command)
+    process = subprocess.Popen(command, shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
     stdout, stderr = process.communicate()
     if process.returncode != 0:
-        print(f"命令执行失败: {command}")
+        print(f"命令执行失败：{command}")
         print(stderr.decode())
-        sys.exit(1)
-    print(stdout.decode())
+        sys.exit(1)  # 退出程序，返回错误码 1
+    print(stdout.decode())  # 添加这一行来打印输出
+    return stdout.decode()
 
 def check_in_group(group):
     """检查当前用户是否在指定组"""
