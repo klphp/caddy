@@ -20,6 +20,7 @@ def install_docker():
     """安装 Docker"""
 
     # 定义源文件和目标文件路径
+    run_command("mkdir -p /etc/docker")
     source_file = os.path.join(utils.current_file_directory(), 'daemon.json')
     destination_file = "/etc/docker/daemon.json"
 
