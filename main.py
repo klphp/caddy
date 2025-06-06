@@ -212,6 +212,8 @@ def add_www_user_and_group():
     """添加 www 用户和用户组"""
     username = "www"  # 要添加的用户名
     group_name = "www"  # 要添加的用户组名
+    target_start_id = 100000
+    target_count = 65536
 
     # 检查 www 用户组是否存在，不存在则创建
     if not check_group_exists(group_name):
@@ -227,20 +229,76 @@ def add_www_user_and_group():
     else:
         print(f"用户 {username} 已存在，跳过创建。")
 
-    # 检查/etc/subuid文件和/etc/subgid是否有www:100000:65536，没有则添加进去
-    if not os.path.exists("/etc/subuid"):
-        run_command("touch /etc/subuid")
-        print(f"已创建 /etc/subuid 文件。")
-    if not os.path.exists("/etc/subgid"):
-        run_command("touch /etc/subgid")
-        print(f"已创建 /etc/subgid 文件。")
-    if "www:100000:65536" not in run_command("cat /etc/subuid"):
-        run_command("echo 'www:100000:65536' >> /etc/subuid")
-        print(f"已添加 www:100000:65536 到 /etc/subuid 文件。")
-    if "www:100000:65536" not in run_command("cat /etc/subgid"):
-        run_command("echo 'www:100000:65536' >> /etc/subgid")
-        print(f"已添加 www:100000:65536 到 /etc/subgid 文件。")
+    # 检查/etc/subuid文件和/etc/subgid是否有www用户，如果没有则添加，如果有则修改，确保内容为www:100000:65536
+    ensure_subuid_subgid(username, target_start_id, target_count)
 
+def ensure_subuid_subgid(username, start_id, count):
+    """
+    检查并修改 /etc/subuid 和 /etc/subgid 文件，确保指定用户的映射存在且正确。
+    如果文件不存在则创建。如果存在用户则修改，否则添加。
+    """
+    if os.geteuid() != 0:
+        print("错误：此脚本需要 root 权限才能运行。请使用 sudo。", file=sys.stderr)
+        sys.exit(1)
+
+    target_line = f"{username}:{start_id}:{count}"
+    
+    for file_path in ["/etc/subuid", "/etc/subgid"]:
+        file_name = os.path.basename(file_path)
+        print(f"正在处理文件：{file_path}...")
+        
+        # 标志，表示是否找到并修改了指定用户的行
+        user_line_found = False
+        temp_lines = [] # 用于存储修改后的所有行
+
+        if not os.path.exists(file_path):
+            try:
+                with open(file_path, 'w') as f:
+                    f.write(f"{target_line}\n")
+                print(f"  已创建 {file_path} 并添加了 {username} 的映射。")
+            except IOError as e:
+                print(f"  错误：无法写入 {file_path}。原因：{e}", file=sys.stderr)
+            continue # 处理下一个文件
+
+        # 文件存在时，读取所有行进行内存修改
+        try:
+            with open(file_path, 'r') as f:
+                lines = f.readlines()
+            
+            for line in lines:
+                if line.strip().startswith(f"{username}:"):
+                    # 找到用户行，替换为目标内容
+                    if line.strip() != target_line:
+                        temp_lines.append(f"{target_line}\n")
+                        user_line_found = True
+                        print(f"  已更新 {username} 在 {file_path} 中的映射。")
+                    else:
+                        # 内容已经正确，无需修改
+                        temp_lines.append(line)
+                        user_line_found = True
+                        print(f"  {username} 在 {file_path} 中的映射已是最新，无需修改。")
+                else:
+                    # 不是目标用户的行，保留不变
+                    temp_lines.append(line)
+
+            if not user_line_found:
+                # 如果没有找到用户行，则添加新行
+                temp_lines.append(f"{target_line}\n")
+                user_line_found = True # 标记为已添加
+                print(f"  已在 {file_path} 中为 {username} 添加新映射。")
+            
+            # 原子性写入：先写入临时文件，再替换原文件
+            temp_file_path = f"{file_path}.tmp"
+            with open(temp_file_path, 'w') as f:
+                f.writelines(temp_lines)
+            
+            os.rename(temp_file_path, file_path) # 原子性替换
+            print(f"  成功更新文件 {file_path}。")
+
+        except IOError as e:
+            print(f"  错误：处理 {file_path} 时发生IO错误。原因：{e}", file=sys.stderr)
+        except Exception as e:
+            print(f"  错误：处理 {file_path} 时发生未知错误。原因：{e}", file=sys.stderr)
 
 def install_docker_compose():
     """安装 Docker Compose"""
