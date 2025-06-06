@@ -7,7 +7,6 @@ def run_command(command, shell=True, cwd=None):
     """
     运行 shell 命令并显示实时输出，如果失败则退出程序。
     """
-    print('COMMAND>>>>>>>', command)
     try:
         # 使用 check_call 或 run，并设置 stdout/stderr 为 None 或 sys.stdout/sys.stderr
         # 这样子进程的输出就会直接流向当前 Python 脚本的输出
