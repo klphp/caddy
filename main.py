@@ -12,32 +12,57 @@ import subprocess
 
 def run_command(command, shell=True, cwd=None):
     """
-    运行 shell 命令并显示实时输出，如果失败则退出程序。
+    运行 shell 命令，捕获并打印实时输出，如果失败则退出程序。
+    返回命令的标准输出 (stdout)。
     """
+    print(f"COMMAND>>>>>>> {command}") # 打印要执行的命令
+
     try:
-        # 使用 check_call 或 run，并设置 stdout/stderr 为 None 或 sys.stdout/sys.stderr
-        # 这样子进程的输出就会直接流向当前 Python 脚本的输出
         process = subprocess.run(
             command,
             shell=shell,
             check=True, # 如果返回码非零，则会抛出 CalledProcessError 异常
             cwd=cwd,
-            # stdout=None, # 默认就是 None，会将输出打印到控制台
-            # stderr=None, # 默认就是 None，会将错误打印到控制台
+            stdout=subprocess.PIPE, # 关键：捕获标准输出
+            stderr=subprocess.PIPE, # 关键：捕获标准错误
             text=True # Python 3.7+ 推荐，用于自动解码输出为字符串
         )
+
+        # 打印标准输出到控制台 (实时效果取决于输出量，这里是完成捕获后一次性打印)
+        if process.stdout:
+            sys.stdout.write(process.stdout)
+            sys.stdout.flush() # 强制刷新缓冲区
+
+        # 打印标准错误到控制台
+        if process.stderr:
+            sys.stderr.write(process.stderr)
+            sys.stderr.flush()
+
         print(f"命令执行成功：{command}")
-        # 返回输出结果
-        return process.stdout
+        
+        # 返回捕获到的标准输出
+        return process.stdout.strip() # .strip() 移除首尾空白字符，包括换行符
+
     except subprocess.CalledProcessError as e:
-        print(f"命令执行失败：{command}")
-        print(f"错误码：{e.returncode}")
-        # subprocess.run 默认会把 stderr 打印出来，所以这里不用重复打印 e.stderr
+        # 在异常中，e.stdout 和 e.stderr 包含了命令的输出
+        # 即使命令失败，也要打印它们的输出，以便调试
+        if e.stdout:
+            sys.stdout.write(e.stdout)
+            sys.stdout.flush()
+        if e.stderr:
+            sys.stderr.write(e.stderr)
+            sys.stderr.flush()
+            
+        print(f"命令执行失败：{command}", file=sys.stderr)
+        print(f"错误码：{e.returncode}", file=sys.stderr)
         sys.exit(1)
     except FileNotFoundError:
         print(f"错误：命令未找到或路径不正确：{command}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
+        print(f"执行命令时发生未知错误：{command}", file=sys.stderr)
+        print(f"错误信息：{e}", file=sys.stderr)
+        sys.exit(1)
         print(f"执行命令时发生未知错误：{command}", file=sys.stderr)
         print(f"错误信息：{e}", file=sys.stderr)
         sys.exit(1)
@@ -200,8 +225,8 @@ def add_user_to_docker_group():
 def get_www_uid_gid():
     """获取www用户的UID和GID"""
     try:
-        uid = run_command("id -u www").strip()
-        gid = run_command("id -g www").strip()
+        uid = run_command("id -u www")
+        gid = run_command("id -g www")
         return uid, gid
     except SystemExit:
         print("获取www用户UID/GID失败")
@@ -321,8 +346,8 @@ def ensure_subuid_subgid(username, start_id, count):
 def install_docker_compose():
     """安装 Docker Compose"""
     version = "v2.26.1"
-    os_name = run_command("uname -s").strip()
-    arch = run_command("uname -m").strip()
+    os_name = run_command("uname -s")
+    arch = run_command("uname -m")
     url = f"https://github.com/docker/compose/releases/download/{version}/docker-compose-{os_name}-{arch}"
     # 判断是否已下载，若没已经下载跳过后续任务
     if os.path.exists("/usr/local/bin/docker-compose"):
