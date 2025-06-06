@@ -488,7 +488,7 @@ if __name__ == "__main__":
         os_info = get_os_distribution()
 
         if os_info:
-            add_user_to_docker_group()
+         
             if os_info.get('ID') == 'ubuntu':
                 print("Ubuntu  Docker脚本安装中......")
                 ubuntu.install_docker()
@@ -498,44 +498,10 @@ if __name__ == "__main__":
             else:
                 print(f"当前系统是 {os_info.get('ID')}")
                 sys.exit(1)  # 退出程序，返回错误码 1
-            add_www_user_and_group()
-            # 检查内核版本是否需要更新
-            current_kernel = run_command("uname -r").strip()
-            print(f"当前内核版本: {current_kernel}")
-            if "6.8.0-54" in current_kernel:
-                print("警告: 内核版本需要更新到6.8.0-60")
-                print("请执行以下命令更新并重启系统:")
-                print("sudo apt install linux-image-generic")
-                print("sudo reboot")
 
-            # 确保Docker服务已启动
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    # 检查并修复常见问题
-                    run_command("systemctl daemon-reload")
-                    run_command("systemctl reset-failed docker.service")
-                    
-                    # 尝试启动服务
-                    run_command("systemctl start docker")
-                    print("Docker服务已启动")
-                    break
-                except SystemExit:
-                    if attempt == max_retries - 1:
-                        print("\nDocker服务启动失败，诊断信息:")
-                        print("1. 检查服务状态:")
-                        run_command("systemctl status docker.service", check=False)
-                        print("\n2. 检查依赖服务:")
-                        run_command("systemctl list-dependencies docker.service", check=False)
-                        print("\n3. 常见解决方案:")
-                        print(" - 重启Docker socket: sudo systemctl restart docker.socket")
-                        print(" - 检查存储驱动: sudo docker info | grep Storage")
-                        print(" - 完全卸载后重装Docker")
-                        print(" - 查看详细日志: journalctl -xeu docker.service")
-                        print("\n可能需要重启系统后重试")
-                    else:
-                        print(f"启动失败，重试中 ({attempt + 1}/{max_retries})")
-                        time.sleep(2)
+            add_user_to_docker_group()
+            add_www_user_and_group()
+            time.sleep(2)
 
             install_docker_compose()
             copy_docker_compose_and_set_permissions()
