@@ -129,8 +129,19 @@ def stop_docker_compose_containers(directory):
 def get_and_confirm_ip():
     """获取用户输入的 IP 地址并确认"""
 
+    # 判断当前目录是否有ip.txt，如果有则提示是否继续使用上次的ip地址，如果没有则写入
+    if os.path.exists("ip.txt"):
+        with open("ip.txt", "r") as f:
+            ip_address = f.read().strip()
+        confirmation = input(f"上次使用的 IP 地址是：{ip_address}，是否继续使用？(y/n): ")
+        if confirmation.lower() == 'y':
+            return ip_address
+
     while True:
         ip_address = input("服务器环境请填写公网ip，内网环境请填写内网ip：")
+        # 将ip写入ip.txt文件中
+        with open("ip.txt", "w") as f:
+            f.write(ip_address)
 
         # 去除两侧多余字符（空格、引号等）
         ip_address = ip_address.strip()
